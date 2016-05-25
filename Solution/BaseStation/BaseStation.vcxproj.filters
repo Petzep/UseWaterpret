@@ -15,13 +15,11 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <None Include="BaseStation.ino" />
+  </ItemGroup>
+  <ItemGroup>
     <ClInclude Include="__vm\.BaseStation.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="BaseStation.ino">
-      <Filter>Source Files</Filter>
-    </None>
   </ItemGroup>
 </Project>
