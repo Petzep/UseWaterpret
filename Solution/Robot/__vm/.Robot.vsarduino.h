@@ -67,6 +67,16 @@ extern "C" void __cxa_pure_virtual() {;}
 
 //
 //
+void armNeutral();
+void grabberNeutral();
+void grabberGrab();
+void grabberTurnPos(int pos);
+void armTurnPos(int pos);
+void resetServos();
+void leBlink(int ledPin, int n);
+void sentAndWait(int delay);
 
 #include <Robot.ino>
+#include <functions.ino>
+#include <routine.ino>
 #endif
