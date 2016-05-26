@@ -6,7 +6,6 @@
 
 #define Servo ServoTimer2
 
-#define NoteAb	(NoteGs/2)
 #define NoteA	110
 #define NoteAs	116
 #define NoteBb	NoteAs
@@ -23,6 +22,7 @@
 #define NoteGb	NoteFs
 #define NoteG	196
 #define NoteGs	208
+#define NoteAb	(NoteGs/2)
 
 #include <ServoTimer2.h>
 #include <AccelStepper.h>
