@@ -12,6 +12,7 @@
 #define _VSARDUINO_H_
 #define __AVR_ATmega328p__
 #define __AVR_ATmega328P__
+#define _VMDEBUG 1
 #define F_CPU 16000000L
 #define ARDUINO 10609
 #define ARDUINO_AVR_DUEMILANOVE
@@ -66,6 +67,11 @@ extern "C" void __cxa_pure_virtual() {;}
 
 //
 //
+bool nrf24Initialize();
+bool compareBuffers(uint8_t *buf1, uint8_t *buf2, uint8_t len);
+bool nrf24ReceiveMessage(uint8_t* str, uint8_t* len);
+bool nrf24SendMessage(uint8_t* str, uint8_t len);
 
 #include <BaseStation.ino>
+#include <..\Shared\nrf24communication.ino>
 #endif

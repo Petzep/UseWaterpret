@@ -5,13 +5,12 @@
 */
 
 #define Servo ServoTimer2
-bool DEBUG = true;
-bool FEEDBACK = true;
+#define DEBUG true
+#define FEEDBACK true
 
 #include <ServoTimer2.h>							// Include servo library
 #include <Stepper.h>
 #include <SPI.h>
-#include <RH_NRF24.h>
 #include <OneWire\OneWire.h>
 #include <DallasTemperatureControl\DallasTemperature.h>
 
@@ -24,8 +23,7 @@ OneWire oneWire(A0);
 DallasTemperature sensors(&oneWire);
 
 Servo servoArm;										// Arm servo signal
-Servo servoGrab;									// Grabbbing Servo
-RH_NRF24 nrf24;										// Singleton instance of the radio driver.
+Servo servoGrab;									// Grabbbing 
 const int delayRest = 100;							// Standard delay for momentum to stablelize
 const int armNeutralPosition = 90;					// Neutral position of the grabber
 const int grabberNeutralPosition = 60;				// Ground position of the grabber
@@ -52,26 +50,27 @@ int remoteStep = 5;
 void setup()										// Built in initialization block
 {
 	Serial.begin(9600);								// open the serial port at 9600 bps:
-	if (!nrf24.init())
-		Serial.println("init failed");
-	// Defaults after init are 2.402 GHz (channel 2), 2Mbps, 0dBm
-	if (!nrf24.setChannel(1))
-		Serial.println("setChannel failed");
-	if (!nrf24.setRF(RH_NRF24::DataRate2Mbps, RH_NRF24::TransmitPower0dBm))
-		Serial.println("setRF failed");
+	nrf24Initialize();
 	
 	servoArm.attach(3);								// Attach Arm signal to the pin
 	servoGrab.attach(5);							// Attach Grab signal to the pin
 
 	// Start up the library
 	sensors.begin();
+
+	uint8_t data[256];
+	uint8_t len;
+	while (!nrf24ReceiveMessage(data, &len)) {}
+	Serial.println((char*) data);
 }
+
+void loop() {}
 
 
 ///////////////////////////////
 //////////MAIN LOOP////////////
 ///////////////////////////////
-void loop()
+void loop2()
 {
 	/*unsigned long currentMillis = millis();
 

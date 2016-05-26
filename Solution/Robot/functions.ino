@@ -69,33 +69,3 @@ void leBlink(int ledPin, int n)
 		delay(100);              // wait for a second
 	}
 }
-
-void sentAndWait(int delay)
-{
-	Serial.println("Sending to nrf24_server");
-	// Send a message to nrf24_server
-	uint8_t data[] = "Hello World!";
-	uint8_t check[] = "And hello back to you";
-	nrf24.send(data, sizeof(data));
-
-	nrf24.waitPacketSent();
-	// Now wait for a reply
-	uint8_t buf[RH_NRF24_MAX_MESSAGE_LEN];
-	uint8_t len = sizeof(buf);
-
-	if (nrf24.waitAvailableTimeout(delay))
-	{
-		// Should be a reply message for us now   
-		if (nrf24.recv(buf, &len))
-		{
-			Serial.print("got reply: ");
-			Serial.println((char*)buf);
-			motorDirection *= -1;
-		}
-		else
-		{
-			Serial.println("recv failed");
-		}
-	}
-	resetServos();
-}

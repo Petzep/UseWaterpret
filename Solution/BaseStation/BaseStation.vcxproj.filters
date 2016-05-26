@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="BaseStation.ino" />
+    <None Include="..\Shared\nrf24communication.ino" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.BaseStation.vsarduino.h">

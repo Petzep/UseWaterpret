@@ -67,6 +67,7 @@ extern "C" void __cxa_pure_virtual() {;}
 
 //
 //
+void loop2();
 void armNeutral();
 void grabberNeutral();
 void grabberGrab();
@@ -74,9 +75,13 @@ void grabberTurnPos(int pos);
 void armTurnPos(int pos);
 void resetServos();
 void leBlink(int ledPin, int n);
-void sentAndWait(int delay);
+bool nrf24Initialize();
+bool compareBuffers(uint8_t *buf1, uint8_t *buf2, uint8_t len);
+bool nrf24ReceiveMessage(uint8_t* str, uint8_t* len);
+bool nrf24SendMessage(uint8_t* str, uint8_t len);
 
 #include <Robot.ino>
 #include <functions.ino>
+#include <..\Shared\nrf24communication.ino>
 #include <routine.ino>
 #endif
