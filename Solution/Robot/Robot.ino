@@ -48,23 +48,44 @@ int remoteStep = 5;
 void setup()										// Built in initialization block
 {
 	Serial.begin(9600);								// open the serial port at 9600 bps:
+	Serial.println("Booting Ariel: Commencing setup");
+	Serial.println(" -Starting Ariel\nSerial port is open @9600.");
+
+	Serial.print(" -Initiating radio:\t");
 	if (!nrf24.init())								// Defaults after init are 2.402 GHz (channel 2), 2Mbps, 0dBm
 		Serial.println("init failed");
+	else
+		Serial.println("OK");
+
+	Serial.print(" -Setting radio channel:\t");
 	if (!nrf24.setChannel(1))
 		Serial.println("setChannel failed");
+	else
+		Serial.println("Channel 1");
+	Serial.print(" -Setting radio settings:\t");
 	if (!nrf24.setRF(RH_NRF24::DataRate2Mbps, RH_NRF24::TransmitPower0dBm))
 		Serial.println("setRF failed");
-	
+	else
+		Serial.println("2Mbps, 0dBm");
+
+	Serial.print(" -Attaching Arm Servo:\t");
 	servoArm.attach(3);								// Attach Arm signal to the pin
 	if (!servoArm.attached())
 		Serial.println("servoArm attach failed");
+	else
+		Serial.println("OK");
 	servoGrab.attach(5);							// Attach Grab signal to the pin
+	Serial.print(" -Attaching Arm Servo:\t");
 	if (!servoGrab.attached())
 		Serial.println("servoGrab attach failed");
+	else
+		Serial.println("OK");
+
 
 	sensors.begin();								// Initialise the temperaturesensor bus
 
-	myStepper.setMaxSpeed(400 * rpm2steps);
+	myStepper.setMaxSpeed(300 * rpm2steps);
+	Serial.println(" -Max speed:\t");
 	Serial.println(myStepper.maxSpeed());
 
 	Serial.println("Ariel has started");
@@ -174,6 +195,7 @@ void loop()
 	case 'r':
 	{
 		RPMtester(myStepper);
+		break;
 	}
 	case '*':
 	{
@@ -182,10 +204,16 @@ void loop()
 		Serial.println(sensors.getTempCByIndex(0));
 		break;
 	}
+	case '/':
+	{
+		Serial.println("Swithcing motor direction");
+		motorDirection *= -1;
+		break;
+	}
 	}
 	// set the motor speed in RPM:
 	if (motorSpeed > 0) {
-		myStepper.setSpeed(motorSpeed * rpm2steps);
+		myStepper.setSpeed(motorDirection * motorSpeed * rpm2steps);
 		myStepper.runSpeed();			//Run motor at set speed.		
 	}
 	else
