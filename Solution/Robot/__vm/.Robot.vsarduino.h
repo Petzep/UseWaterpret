@@ -66,18 +66,11 @@ extern "C" void __cxa_pure_virtual() {;}
 #define portModeRegister(P)
 
 //
+void playNote(int tone, int octave, int sixteenths);
+void pause(int sixteenths);
+void playZelda();
+void playHappyBirthday();
 //
-void armNeutral();
-void grabberNeutral();
-void grabberGrab();
-void grabberTurnPos(int pos);
-void armTurnPos(int pos);
-void resetServos();
-void leBlink(int ledPin, int n);
-void sentAndWait(int delay);
-void r_Grab();
 
 #include <Robot.ino>
-#include <functions.ino>
-#include <routine.ino>
 #endif
