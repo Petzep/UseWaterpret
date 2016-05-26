@@ -6,16 +6,21 @@
 
 #define Servo ServoTimer2
 
+#define NoteAb	(NoteGs/2)
 #define NoteA	110
 #define NoteAs	116
+#define NoteBb	NoteAs
 #define NoteB	124
 #define NoteC	131
 #define NoteCs	139
+#define NoteDb	NoteCs
 #define NoteD	147
 #define NoteDs	155
+#define NoteEb	NoteDs
 #define NoteE	165
 #define NoteF	174
 #define NoteFs	186
+#define NoteGb	NoteFs
 #define NoteG	196
 #define NoteGs	208
 
@@ -117,6 +122,3 @@ void loop()
 	playZelda();
 	playHappyBirthday();
 }
-
-
-
