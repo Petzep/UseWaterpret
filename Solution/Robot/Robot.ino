@@ -15,11 +15,11 @@ bool FEEDBACK = true;
 #include <OneWire\OneWire.h>
 #include <DallasTemperatureControl\DallasTemperature.h>
 
-void RPMtester(AccelStepper &driver);
+void RPMtester(AccelStepper driver);				// Small RPM that tests the Acceleration.
 OneWire oneWire(A0);								// Setup a oneWire instance to communicate with any OneWire devices 
 DallasTemperature sensors(&oneWire);				// Pass the oneWire reference to Dallas Temperature.
 RH_NRF24 nrf24;										// Singleton instance of the radio driver.
-AccelStepper myStepper(stepsPerRevolution, 2, 4, 6, 7);	// initialize the stepper library on pins 8 through 11:
+AccelStepper myStepper(AccelStepper::FULL4WIRE, 2, 4, 6, 7, FALSE);	// initialize the stepper library on pins 2,4,6,7 and disable the output;
 Servo servoArm;										// Arm servo signal
 Servo servoGrab;									// Grabbbing Servo
 const int delayRest = 100;							// Standard delay for momentum to stablelize
@@ -29,12 +29,12 @@ const int grabberGrabPosition = 0;					// Position for closed grabbers
 const int armOffset = 0;							// turn ofset for the head in degrees
 const int stepsPerRevolution = 200;					// change this to fit the number of steps per revolution for your motor
 const float pi = 3.141592654;						// this one is a piece of cake
-
 			
 int stepCount = 0;									// number of steps the motor has taken
 int motorSpeed = 0;									// Speed of the motor in RPM
 int motorDirection = 1;								// direction of the motor
 unsigned long previousMillis = 0;					// will store last time LED was updatedvccv
+float rpm2steps = stepsPerRevolution / 60.0f;
 
 /////////////////////////////////
 ///USER DETERMINED VARIABLES/////
@@ -64,9 +64,10 @@ void setup()										// Built in initialization block
 
 	sensors.begin();								// Initialise the temperaturesensor bus
 
-	myStepper.setMaxSpeed(360);
+	myStepper.setMaxSpeed(400 * rpm2steps);
+	Serial.println(myStepper.maxSpeed());
 
-	Serial.println("Ariël has started");
+	Serial.println("Ariel has started");
 }
 
 
@@ -158,18 +159,21 @@ void loop()
 	}
 	case '5':
 	{
-		Serial.println("turning one round: ");
-		myStepper.setSpeed(60);
-		myStepper.step(stepsPerRevolution);
+		Serial.println("turning one round @60RPM: ");
+		myStepper.stop();
+		myStepper.setSpeed(60 * rpm2steps);
+		myStepper.move(stepsPerRevolution);
+		myStepper.runToPosition();
+		break;
+	}
+	case 'g':
+	{
+		r_Grab();
 		break;
 	}
 	case 'r':
 	{
-		Serial.println("testing RPM: ");
-		myStepper.setSpeed(60);
-		myStepper.step(stepsPerRevolution);
-		//RPMtester(myStepper);
-		break;
+		RPMtester(myStepper);
 	}
 	case '*':
 	{
@@ -181,10 +185,11 @@ void loop()
 	}
 	// set the motor speed in RPM:
 	if (motorSpeed > 0) {
-		myStepper.setSpeed(motorSpeed);
-		// step 1/100 of a revolution:
-		myStepper.step(motorDirection*stepsPerRevolution / 100);
+		myStepper.setSpeed(motorSpeed * rpm2steps);
+		myStepper.runSpeed();			//Run motor at set speed.		
 	}
+	else
+		myStepper.disableOutputs();
 }
 
 

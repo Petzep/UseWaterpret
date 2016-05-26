@@ -23,8 +23,10 @@ void grabberGrab()
 {
 	if (FEEDBACK)
 		Serial.println("Grabbing");
+	servoGrab.write(180);
+	delay(1000);
 	servoGrab.write(grabberGrabPosition);							//Grab (and move up arm?)
-	delay(100);
+	delay(1000);
 }
 
 void grabberTurnPos(int pos)
@@ -51,6 +53,8 @@ void armTurnPos(int pos)
 
 void resetServos()
 {
+	if (FEEDBACK)
+		Serial.println("Resetting servo");
 	delay(80);
 	servoGrab.write(grabPos + 1);
 	servoArm.write(armPos + 1);
@@ -63,10 +67,10 @@ void leBlink(int ledPin, int n)
 {
 	for (int i = 0; i < n; i++)
 	{
-		digitalWrite(ledPin, HIGH);   // turn the LED on (HIGH is the voltage level)
-		delay(100);              // wait for a second
-		digitalWrite(ledPin, LOW);    // turn the LED off by making the voltage LOW
-		delay(100);              // wait for a second
+		digitalWrite(ledPin, HIGH);		// turn the LED on (HIGH is the voltage level)
+		delay(100);						// wait for a second
+		digitalWrite(ledPin, LOW);		// turn the LED off by making the voltage LOW
+		delay(100);						// wait for a second
 	}
 }
 

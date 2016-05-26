@@ -1,20 +1,30 @@
-void RPMtester(AccelStepper & driver)
+void r_Grab()
 {
-	int testArray[] = {5,60, 90, 120, 180, 300 };	
-	for (int i = 0; i < sizeof(testArray); i++)
+	grabberGrab();
+	armTurnPos(0);
+	delay(1000);
+	grabberTurnPos(180);
+	delay(1000);
+	grabberNeutral();
+	armNeutral();
+}
+
+void RPMtester(AccelStepper driver)
+{
+	Serial.println("Testing RPM:");
+	Serial.print(" -Max speed: ");
+	Serial.println(driver.maxSpeed());
+	Serial.print(" -Acceleration: ");
+	for (int i = 100; i < 500; i += 50)
 	{
-		driver.setSpeed(testArray[i]);
-		unsigned long currentMillis = millis();
-		unsigned long previousMillis = currentMillis;
-		while (currentMillis - previousMillis <= (60000 / testArray[i]))
-		{
-			currentMillis = millis();
-			driver.step(stepsPerRevolution / 100);
-		}
-		delay(100);
-		driver.setSpeed(testArray[i]);
-		driver.step(-stepsPerRevolution);
-		previousMillis = currentMillis;
-		delay(100);
+		Serial.println(i);
+		driver.setAcceleration(i);
+		driver.move(500 * stepsPerRevolution);
+		while (driver.distanceToGo())
+			driver.run();
+		Serial.println("Starting next iteration in 1 second");
+		delay(1000);
 	}
+	Serial.println("Nope....Test is over. Resuming in 3 seconds");
+	delay(3000);
 }

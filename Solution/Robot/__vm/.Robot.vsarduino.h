@@ -75,6 +75,7 @@ void armTurnPos(int pos);
 void resetServos();
 void leBlink(int ledPin, int n);
 void sentAndWait(int delay);
+void r_Grab();
 
 #include <Robot.ino>
 #include <functions.ino>
