@@ -1,4 +1,4 @@
-void RPMtester(Stepper &driver)
+void RPMtester(AccelStepper & driver)
 {
 	int testArray[] = {5,60, 90, 120, 180, 300 };	
 	for (int i = 0; i < sizeof(testArray); i++)

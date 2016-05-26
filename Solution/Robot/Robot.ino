@@ -9,31 +9,27 @@ bool DEBUG = true;
 bool FEEDBACK = true;
 
 #include <ServoTimer2.h>							// Include servo library
-#include <Stepper.h>
+#include <AccelStepper.h>
 #include <SPI.h>
 #include <RH_NRF24.h>
 #include <OneWire\OneWire.h>
 #include <DallasTemperatureControl\DallasTemperature.h>
 
-void RPMtester(Stepper &driver);
-// Setup a oneWire instance to communicate with any OneWire devices 
-// (not just Maxim/Dallas temperature ICs)
-OneWire oneWire(A0);
-
-// Pass our oneWire reference to Dallas Temperature.
-DallasTemperature sensors(&oneWire);
-
+void RPMtester(AccelStepper &driver);
+OneWire oneWire(A0);								// Setup a oneWire instance to communicate with any OneWire devices 
+DallasTemperature sensors(&oneWire);				// Pass the oneWire reference to Dallas Temperature.
+RH_NRF24 nrf24;										// Singleton instance of the radio driver.
+AccelStepper myStepper(stepsPerRevolution, 2, 4, 6, 7);	// initialize the stepper library on pins 8 through 11:
 Servo servoArm;										// Arm servo signal
 Servo servoGrab;									// Grabbbing Servo
-RH_NRF24 nrf24;										// Singleton instance of the radio driver.
 const int delayRest = 100;							// Standard delay for momentum to stablelize
 const int armNeutralPosition = 90;					// Neutral position of the grabber
 const int grabberNeutralPosition = 60;				// Ground position of the grabber
 const int grabberGrabPosition = 0;					// Position for closed grabbers
 const int armOffset = 0;							// turn ofset for the head in degrees
-const float pi = 3.141592654;						// this one is a piece of cake
 const int stepsPerRevolution = 200;					// change this to fit the number of steps per revolution for your motor
-Stepper myStepper(stepsPerRevolution, 2, 4, 6, 7);	// initialize the stepper library on pins 8 through 11:
+const float pi = 3.141592654;						// this one is a piece of cake
+
 			
 int stepCount = 0;									// number of steps the motor has taken
 int motorSpeed = 0;									// Speed of the motor in RPM
@@ -52,19 +48,25 @@ int remoteStep = 5;
 void setup()										// Built in initialization block
 {
 	Serial.begin(9600);								// open the serial port at 9600 bps:
-	if (!nrf24.init())
+	if (!nrf24.init())								// Defaults after init are 2.402 GHz (channel 2), 2Mbps, 0dBm
 		Serial.println("init failed");
-	// Defaults after init are 2.402 GHz (channel 2), 2Mbps, 0dBm
 	if (!nrf24.setChannel(1))
 		Serial.println("setChannel failed");
 	if (!nrf24.setRF(RH_NRF24::DataRate2Mbps, RH_NRF24::TransmitPower0dBm))
 		Serial.println("setRF failed");
 	
 	servoArm.attach(3);								// Attach Arm signal to the pin
+	if (!servoArm.attached())
+		Serial.println("servoArm attach failed");
 	servoGrab.attach(5);							// Attach Grab signal to the pin
+	if (!servoGrab.attached())
+		Serial.println("servoGrab attach failed");
 
-	// Start up the library
-	sensors.begin();
+	sensors.begin();								// Initialise the temperaturesensor bus
+
+	myStepper.setMaxSpeed(360);
+
+	Serial.println("Ariël has started");
 }
 
 

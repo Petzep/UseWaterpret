@@ -25,6 +25,8 @@ void setup()
 		Serial.println("setChannel failed");
 	if (!nrf24.setRF(RH_NRF24::DataRate2Mbps, RH_NRF24::TransmitPower0dBm))
 		Serial.println("setRF failed");
+
+	Serial.println("Basestation Atlantis initialized");
 }
 
 void loop()
