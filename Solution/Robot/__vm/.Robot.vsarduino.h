@@ -70,6 +70,7 @@ void playNote(int tone, int octave, int sixteenths);
 void pause(int sixteenths);
 void playZelda();
 void playHappyBirthday();
+void playOriBlindForest();
 //
 
 #include <Robot.ino>

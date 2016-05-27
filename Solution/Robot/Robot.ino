@@ -36,13 +36,13 @@ void setup()
 {
 	Serial.begin(9600);
 	myStepper.setAcceleration(9999.f);
-	myStepper.setMaxSpeed(1000);
+	myStepper.setMaxSpeed(2000);
 
 }
 
 void playNote(int tone, int octave, int sixteenths) {
 	direction *= -1;
-	myStepper.setSpeed(direction * tone * (1 << (octave-1)));
+	myStepper.setSpeed(direction * tone * (1 << (octave - 1)));
 	unsigned long time = millis() + sixteenths * (15000L / tempo);
 	while (millis() < time) {
 		myStepper.runSpeed();
@@ -114,6 +114,121 @@ void playHappyBirthday() {
 	pause(18);
 }
 
+void playOriBlindForest() {
+	tempo = 82;
+
+	playNote(NoteD, 2, 4);
+	playNote(NoteCs, 2, 2);
+	playNote(NoteB, 2, 2);
+	playNote(NoteA, 2, 4);
+	playNote(NoteFs, 1, 4);
+
+	playNote(NoteD, 2, 4);
+	playNote(NoteCs, 2, 2);
+	playNote(NoteB, 2, 2);
+	playNote(NoteCs, 2, 8);
+
+	playNote(NoteD, 2, 4);
+	playNote(NoteCs, 2, 2);
+	playNote(NoteB, 2, 2);
+	playNote(NoteA, 2, 4);
+	playNote(NoteFs, 1, 4);
+
+	playNote(NoteA, 2, 8);
+	playNote(NoteFs, 1, 8);
+
+	playNote(NoteD, 2, 1);
+	playNote(NoteB, 2, 1);
+	playNote(NoteCs, 2, 1);
+	playNote(NoteB, 2, 1);
+	playNote(NoteD, 2, 1);
+	playNote(NoteFs, 2, 1);
+	playNote(NoteCs, 2, 1);
+	playNote(NoteFs, 2, 1);
+
+	playNote(NoteD, 2, 1);
+	playNote(NoteG, 2, 1);
+	playNote(NoteCs, 2, 1);
+	playNote(NoteG, 2, 1);
+	playNote(NoteD, 2, 1);
+	playNote(NoteA, 3, 1);
+	playNote(NoteE, 2, 1);
+	playNote(NoteA, 3, 1);
+
+	playNote(NoteFs, 2, 2);
+	pause(2);
+	playNote(NoteFs, 2, 2);
+	pause(2);
+	playNote(NoteFs, 2, 2);
+	playNote(NoteE, 2, 2);
+	playNote(NoteA, 3, 2);
+	playNote(NoteFs, 2, 2);
+
+	playNote(NoteD, 2, 4);
+	playNote(NoteE, 2, 1);
+	playNote(NoteFs, 2, 1);
+	playNote(NoteA, 3, 2);
+	playNote(NoteB, 3, 4);
+	playNote(NoteCs, 3, 4);
+
+	playNote(NoteD, 3, 4);
+	playNote(NoteCs, 3, 2);
+	playNote(NoteB, 3, 2);
+	playNote(NoteA, 3, 4);
+	playNote(NoteFs, 2, 4);
+
+	playNote(NoteD, 3, 4);
+	playNote(NoteCs, 3, 2);
+	playNote(NoteB, 3, 2);
+	playNote(NoteCs, 3, 8);
+
+	playNote(NoteD, 3, 4);
+	playNote(NoteCs, 3, 2);
+	playNote(NoteB, 3, 2);
+	playNote(NoteA, 3, 4);
+	playNote(NoteFs, 2, 4);
+
+	playNote(NoteE, 2, 6);
+	playNote(NoteD, 2, 2);
+	playNote(NoteE, 2, 4);
+	playNote(NoteA, 3, 4);
+
+	playNote(NoteD, 3, 4);
+	playNote(NoteCs, 3, 2);
+	playNote(NoteB, 3, 2);
+	playNote(NoteA, 3, 4);
+	playNote(NoteFs, 2, 2);
+	playNote(NoteCs, 3, 1);
+	playNote(NoteA, 3, 1);
+
+	playNote(NoteD, 3, 4);
+	playNote(NoteCs, 3, 2);
+	playNote(NoteB, 3, 2);
+	playNote(NoteCs, 3, 2);
+	playNote(NoteFs, 2, 2);
+	playNote(NoteD, 3, 2);
+	playNote(NoteE, 3, 2);
+
+	playNote(NoteFs, 3, 2);
+	pause(2);
+	playNote(NoteFs, 3, 2);
+	pause(2);
+	playNote(NoteFs, 3, 2);
+	playNote(NoteE, 3, 2);
+	playNote(NoteA, 4, 2);
+	playNote(NoteFs, 3, 2);
+
+	playNote(NoteD, 3, 6);
+	playNote(NoteE, 3, 1);
+	playNote(NoteD, 3, 1);
+	playNote(NoteCs, 3, 4);
+	playNote(NoteA, 3, 4);
+
+	playNote(NoteB, 3, 10);
+	pause(22);
+
+}
+
 ///////////////////////////////
 //////////MAIN LOOP////////////
 ///////////////////////////////
@@ -121,4 +236,7 @@ void loop()
 {
 	playZelda();
 	playHappyBirthday();
+	playOriBlindForest();
 }
+
+
