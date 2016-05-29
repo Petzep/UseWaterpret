@@ -18,12 +18,12 @@ void setup()
 	while (!Serial)
 		; // wait for serial port to connect. Needed for Leonardo only
 	nrf24Initialize();
-
-	uint8_t* data = (uint8_t*) "Test bericht";
-	nrf24SendMessage(data, 13);
 }
 
 void loop() {
+	uint8_t* data = (uint8_t*) "Test bericht";
+	nrf24SendMessage(data, 13);
 
+	delay(1000);
 }
 

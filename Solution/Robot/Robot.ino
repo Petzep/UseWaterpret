@@ -57,14 +57,17 @@ void setup()										// Built in initialization block
 
 	// Start up the library
 	sensors.begin();
+}
+
+void loop() {
 
 	uint8_t data[256];
 	uint8_t len;
 	while (!nrf24ReceiveMessage(data, &len)) {}
-	Serial.println((char*) data);
-}
+	Serial.println((char*)data);
 
-void loop() {}
+	delay(1000);
+}
 
 
 ///////////////////////////////

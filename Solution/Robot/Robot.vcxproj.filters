@@ -23,5 +23,6 @@
     <None Include="Robot.ino" />
     <None Include="functions.ino" />
     <None Include="routine.ino" />
+    <None Include="..\Shared\nrf24communication.ino" />
   </ItemGroup>
 </Project>
