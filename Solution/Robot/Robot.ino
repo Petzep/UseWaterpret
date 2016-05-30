@@ -52,21 +52,22 @@ void setup()										// Built in initialization block
 	Serial.println(" -Starting Ariel\nSerial port is open @9600.");
 
 	Serial.print(" -Initiating radio:\t");
-	if (!nrf24.init())								// Defaults after init are 2.402 GHz (channel 2), 2Mbps, 0dBm
-		Serial.println("init failed");
-	else
+	if (nrf24.init())								// Defaults after init are 2.402 GHz (channel 2), 2Mbps, 0dBm
+	{
 		Serial.println("OK");
-
-	Serial.print(" -Setting radio channel:\t");
-	if (!nrf24.setChannel(1))
-		Serial.println("setChannel failed");
+		Serial.print(" -Setting radio channel:\t");
+		if (!nrf24.setChannel(1))
+			Serial.println("setChannel failed");
+		else
+			Serial.println("Channel 1");
+		Serial.print(" -Setting radio settings:\t");
+		if (!nrf24.setRF(RH_NRF24::DataRate2Mbps, RH_NRF24::TransmitPower0dBm))
+			Serial.println("setRF failed");
+		else
+			Serial.println("2Mbps, 0dBm");
+	}
 	else
-		Serial.println("Channel 1");
-	Serial.print(" -Setting radio settings:\t");
-	if (!nrf24.setRF(RH_NRF24::DataRate2Mbps, RH_NRF24::TransmitPower0dBm))
-		Serial.println("setRF failed");
-	else
-		Serial.println("2Mbps, 0dBm");
+		Serial.println("init failed");
 
 	Serial.print(" -Attaching Arm Servo:\t");
 	servoArm.attach(3);								// Attach Arm signal to the pin
@@ -84,9 +85,11 @@ void setup()										// Built in initialization block
 
 	sensors.begin();								// Initialise the temperaturesensor bus
 
-	myStepper.setMaxSpeed(300 * rpm2steps);
+	myStepper.setMaxSpeed(220 * rpm2steps);
 	Serial.println(" -Max speed:\t");
 	Serial.println(myStepper.maxSpeed());
+	myStepper.setAcceleration(350);
+	Serial.println(" -Max speed:\t");
 
 	Serial.println("Ariel has started");
 }
@@ -135,6 +138,8 @@ void loop()
 	case '9':
 	{
 		motorSpeed += remoteStep;
+		if (motorSpeed > myStepper.maxSpeed())
+			motorSpeed = myStepper.maxSpeed();
 		Serial.print("Motorspeed: ");
 		Serial.println(motorSpeed);
 		break;
@@ -181,10 +186,9 @@ void loop()
 	case '5':
 	{
 		Serial.println("turning one round @60RPM: ");
-		myStepper.stop();
 		myStepper.setSpeed(60 * rpm2steps);
 		myStepper.move(stepsPerRevolution);
-		myStepper.runToPosition();
+		myStepper.runSpeedToPosition();
 		break;
 	}
 	case 'g':
@@ -200,8 +204,20 @@ void loop()
 	case '*':
 	{
 		sensors.requestTemperatures(); // Send the command to get temperatures
-		Serial.print("Temperature for Device 1 is: ");
+		Serial.print("Temperature for the Steppermotor is: ");
 		Serial.println(sensors.getTempCByIndex(0));
+		break;
+	}
+	case '.':
+	{
+		Serial.println("Locking the motor for 1 second");
+		myStepper.setSpeed(0);
+		myStepper.move(1);
+		myStepper.move(-1);
+		unsigned long previousMillis = millis();
+		while (millis() - previousMillis <= 1000)
+			myStepper.runSpeed();
+		myStepper.disableOutputs();
 		break;
 	}
 	case '/':
@@ -209,6 +225,34 @@ void loop()
 		Serial.println("Swithcing motor direction");
 		motorDirection *= -1;
 		break;
+	case '[':
+	{
+		Serial.println("Reseting motor position to 0");
+		myStepper.setCurrentPosition(myStepper.currentPosition());
+		break;
+	}
+	case ']':
+	{
+		Serial.print("Current motor position: ");
+		Serial.println(myStepper.currentPosition());
+		break;
+	}
+	case '3':
+	{
+		Serial.println("Extending arm ");
+		myStepper.move(-1050);
+		while (myStepper.distanceToGo())
+			myStepper.run();
+		break;
+	}
+	case '1':
+	{
+		Serial.println("Retracting arm ");
+		myStepper.move(1050);
+		while (myStepper.distanceToGo())
+			myStepper.run();
+		break;
+	}
 	}
 	}
 	// set the motor speed in RPM:
