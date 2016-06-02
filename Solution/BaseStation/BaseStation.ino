@@ -6,7 +6,7 @@
 
 #include <SPI.h>
 
-#define DEBUG true
+#define ENABLE_DEBUG
 
 // RH_NRF24 nrf24(8, 7); // use this to be electrically compatible with Mirf
 // RH_NRF24 nrf24(8, 10);// For Leonardo, need explicit SS pin

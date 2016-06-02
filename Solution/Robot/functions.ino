@@ -3,8 +3,8 @@
 ////////////////////////////////////////
 void armNeutral()
 {
-	if (FEEDBACK)
-		Serial.println("Arm to neutral position");
+	debugln("Arm to neutral position");
+
 	servoArm.write(armNeutralPosition);								//neutral position
 	armPos = armNeutralPosition;
 	delay(100);
@@ -12,8 +12,8 @@ void armNeutral()
 
 void grabberNeutral()
 {
-	if (FEEDBACK)
-		Serial.println("Grabber to neutral position");
+	debugln("Grabber to neutral position");
+
 	servoGrab.write(grabberNeutralPosition);						//neutral position
 	grabPos = grabberNeutralPosition;
 	delay(200);
@@ -21,8 +21,8 @@ void grabberNeutral()
 
 void grabberGrab()
 {
-	if (FEEDBACK)
-		Serial.println("Grabbing");
+	debugln("Grabbing");
+
 	servoGrab.write(180);
 	delay(1000);
 	servoGrab.write(grabberGrabPosition);							//Grab (and move up arm?)
@@ -31,30 +31,26 @@ void grabberGrab()
 
 void grabberTurnPos(int pos)
 {
-	if (FEEDBACK)
-	{
-		Serial.print("Grabber to position ");
-		Serial.println(pos);
-	}
+	debug("Grabber to position ");
+	debugln(pos);
+
 	servoGrab.write(pos);											//servo position
 	delay(100);
 }
 
 void armTurnPos(int pos)
 {
-	if (FEEDBACK)
-	{
-		Serial.print("Arm to position ");
-		Serial.println(pos);
-	}
+	debug("Arm to position ");
+	debugln(pos);
+
 	servoArm.write(pos);											//servo position
 	delay(100);
 }
 
 void resetServos()
 {
-	if (FEEDBACK)
-		Serial.println("Resetting servo");
+	debugln("Resetting servo");
+
 	delay(80);
 	servoGrab.write(grabPos + 1);
 	servoArm.write(armPos + 1);

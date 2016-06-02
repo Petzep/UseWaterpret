@@ -5,9 +5,18 @@
 */
 
 #define Servo ServoTimer2
-bool DEBUG = true;
-bool FEEDBACK = true;
+#define ENABLE_DEBUG
 
+#ifndef ENABLE_DEBUG
+// disable Serial output
+#define debugln(a) (Serial.println(a))
+#define debug(a) (Serial.print(a))
+#else
+#define debugln(a)
+#define debug(a)
+#endif
+
+#include <Arduino.h>								// Fixes some define problems
 #include <ServoTimer2.h>							// Include servo library
 #include <AccelStepper.h>							// AccelStepper library for precise and fluid steppercontrol
 #include <SPI.h>									// The SPI-communication liberary for the antenna
