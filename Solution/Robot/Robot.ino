@@ -5,246 +5,239 @@
 */
 
 #define Servo ServoTimer2
-#define ENABLE_DEBUG
 
-#ifndef ENABLE_DEBUG
-// disable Serial output
-#define debugln(a) (Serial.println(a))
-#define debug(a) (Serial.print(a))
-#else
-#define debugln(a)
-#define debug(a)
-#endif
+#define NoteA	110
+#define NoteAs	116
+#define NoteBb	NoteAs
+#define NoteB	124
+#define NoteC	131
+#define NoteCs	139
+#define NoteDb	NoteCs
+#define NoteD	147
+#define NoteDs	155
+#define NoteEb	NoteDs
+#define NoteE	165
+#define NoteF	174
+#define NoteFs	186
+#define NoteGb	NoteFs
+#define NoteG	196
+#define NoteGs	208
+#define NoteAb	(NoteGs/2)
 
-#include <Arduino.h>								// Fixes some define problems
-#include <ServoTimer2.h>							// Include servo library
-#include <AccelStepper.h>							// AccelStepper library for precise and fluid steppercontrol
-#include <SPI.h>									// The SPI-communication liberary for the antenna
-#include <OneWire\OneWire.h>						// The OneWire-protocol used by te temp sensor
-#include <DallasTemperatureControl\DallasTemperature.h>	// DallasTemperature library for controlling the DS18S20 temperature monitor
+#include <Arduino.h>
+#include <ServoTimer2.h>
+#include <AccelStepper.h>
 
-void RPMtester(AccelStepper driver);				// Small RPM that tests the Acceleration.
-OneWire oneWire(A0);								// Setup a oneWire instance to communicate with any OneWire devices 
-DallasTemperature sensors(&oneWire);				// Pass the oneWire reference to Dallas Temperature.							
-AccelStepper myStepper(AccelStepper::FULL4WIRE, 2, 4, 6, 7, FALSE);	// initialize the stepper library on pins 2,4,6,7 and disable the output;
-Servo servoArm;										// Arm servo signal
-Servo servoGrab;									// Grabbbing Servo
-const int delayRest = 100;							// Standard delay for momentum to stablelize
-const int armNeutralPosition = 90;					// Neutral position of the grabber
-const int grabberNeutralPosition = 60;				// Ground position of the grabber
-const int grabberGrabPosition = 0;					// Position for closed grabbers
-const int armOffset = 0;							// turn ofset for the head in degrees
-const int stepsPerRevolution = 200;					// change this to fit the number of steps per revolution for your motor
-const float pi = 3.141592654;						// this one is a piece of cake
-			
-int stepCount = 0;									// number of steps the motor has taken
-int motorSpeed = 0;									// Speed of the motor in RPM
-int motorDirection = 1;								// direction of the motor
-unsigned long previousMillis = 0;					// will store last time LED was updatedvccv
-float rpm2steps = stepsPerRevolution / 60.0f;
+AccelStepper myStepper(AccelStepper::FULL4WIRE, 2, 4, 6, 7, false);	// initialize the stepper library on pins 2,4,6,7 and disable the output;
 
-/////////////////////////////////
-///USER DETERMINED VARIABLES/////
-/////////////////////////////////
-int dist_Collision = 40;
-int dist_Edge = 10;
-int armPos = armNeutralPosition;
-int grabPos = grabberNeutralPosition;
-int remoteStep = 5;
+unsigned long tempo = 160;
+int direction = 1;
 
-void setup()										// Built in initialization block
+void setup()
 {
-	Serial.begin(9600);								// open the serial port at 9600 bps:
-	Serial.println("Booting Ariel: Commencing setup");
-	Serial.println(" -Starting Ariel\nSerial port is open @9600.");
+	Serial.begin(9600);
+	myStepper.setAcceleration(9999.f);
+	myStepper.setMaxSpeed(2000);
 
-	nrf24Initialize();								// Radio initialisation fuction
-
-	Serial.print(" -Attaching Arm Servo:\t");
-	servoArm.attach(3);								// Attach Arm signal to the pin
-	if (!servoArm.attached())
-		Serial.println("servoArm attach failed");
-	else
-		Serial.println("OK");
-	servoGrab.attach(5);							// Attach Grab signal to the pin
-	Serial.print(" -Attaching Arm Servo:\t");
-	if (!servoGrab.attached())
-		Serial.println("servoGrab attach failed");
-	else
-		Serial.println("OK");
-
-	sensors.begin();								// Initialise the temperaturesensor bus
-
-	myStepper.setMaxSpeed(220 * rpm2steps);
-	Serial.println(" -Max speed:\t");
-	Serial.println(myStepper.maxSpeed());
-	myStepper.setAcceleration(350);
-	Serial.println(" -Max speed:\t");
-
-	Serial.println("Ariel has started");
 }
 
+void playNote(int tone, int octave, int sixteenths) {
+	direction *= -1;
+	myStepper.setSpeed(direction * tone * (1 << (octave - 1)));
+	unsigned long time = millis() + sixteenths * (15000L / tempo);
+	while (millis() < time) {
+		myStepper.runSpeed();
+	}
+	myStepper.disableOutputs();
+}
+
+void pause(int sixteenths) {
+	unsigned long time = millis() + sixteenths * (15000L / tempo);
+	while (millis() < time) {
+		// actively do nothing :D
+	}
+}
+
+void playZelda() {
+	tempo = 160; // bpm
+	playNote(NoteG, 2, 2);
+	playNote(NoteFs, 2, 2);
+	playNote(NoteDs, 2, 2);
+	playNote(NoteA, 2, 2);
+
+	playNote(NoteGs, 1, 2);
+	playNote(NoteE, 2, 2);
+	playNote(NoteGs, 2, 2);
+	playNote(NoteC, 3, 4);
+
+	pause(14);
+}
+
+void playHappyBirthday() {
+	tempo = 110; // bpm
+	playNote(NoteC, 2, 3);
+	playNote(NoteC, 2, 1);
+
+	playNote(NoteD, 2, 4);
+	playNote(NoteC, 2, 4);
+	playNote(NoteF, 2, 4);
+
+	playNote(NoteE, 2, 5);
+	pause(3);
+	playNote(NoteC, 2, 3);
+	playNote(NoteC, 2, 1);
+
+	playNote(NoteD, 2, 4);
+	playNote(NoteC, 2, 4);
+	playNote(NoteG, 2, 4);
+
+	playNote(NoteF, 2, 5);
+	pause(3);
+	playNote(NoteC, 2, 3);
+	playNote(NoteC, 2, 1);
+
+	playNote(NoteC, 3, 4);
+	playNote(NoteA, 3, 4);
+	playNote(NoteF, 2, 3);
+	playNote(NoteF, 2, 1);
+
+	playNote(NoteE, 2, 4);
+	playNote(NoteD, 2, 4);
+	playNote(NoteAs, 3, 3);
+	playNote(NoteAs, 3, 1);
+
+	playNote(NoteA, 3, 4);
+	playNote(NoteF, 2, 4);
+	playNote(NoteG, 2, 4);
+
+	playNote(NoteF, 2, 6);
+
+	pause(18);
+}
+
+void playOriBlindForest() {
+	tempo = 82;
+
+	playNote(NoteD, 2, 4);
+	playNote(NoteCs, 2, 2);
+	playNote(NoteB, 2, 2);
+	playNote(NoteA, 2, 4);
+	playNote(NoteFs, 1, 4);
+
+	playNote(NoteD, 2, 4);
+	playNote(NoteCs, 2, 2);
+	playNote(NoteB, 2, 2);
+	playNote(NoteCs, 2, 8);
+
+	playNote(NoteD, 2, 4);
+	playNote(NoteCs, 2, 2);
+	playNote(NoteB, 2, 2);
+	playNote(NoteA, 2, 4);
+	playNote(NoteFs, 1, 4);
+
+	playNote(NoteA, 2, 8);
+	playNote(NoteFs, 1, 8);
+
+	playNote(NoteD, 2, 1);
+	playNote(NoteB, 2, 1);
+	playNote(NoteCs, 2, 1);
+	playNote(NoteB, 2, 1);
+	playNote(NoteD, 2, 1);
+	playNote(NoteFs, 2, 1);
+	playNote(NoteCs, 2, 1);
+	playNote(NoteFs, 2, 1);
+
+	playNote(NoteD, 2, 1);
+	playNote(NoteG, 2, 1);
+	playNote(NoteCs, 2, 1);
+	playNote(NoteG, 2, 1);
+	playNote(NoteD, 2, 1);
+	playNote(NoteA, 3, 1);
+	playNote(NoteE, 2, 1);
+	playNote(NoteA, 3, 1);
+
+	playNote(NoteFs, 2, 2);
+	pause(2);
+	playNote(NoteFs, 2, 2);
+	pause(2);
+	playNote(NoteFs, 2, 2);
+	playNote(NoteE, 2, 2);
+	playNote(NoteA, 3, 2);
+	playNote(NoteFs, 2, 2);
+
+	playNote(NoteD, 2, 4);
+	playNote(NoteE, 2, 1);
+	playNote(NoteFs, 2, 1);
+	playNote(NoteA, 3, 2);
+	playNote(NoteB, 3, 4);
+	playNote(NoteCs, 3, 4);
+
+	playNote(NoteD, 3, 4);
+	playNote(NoteCs, 3, 2);
+	playNote(NoteB, 3, 2);
+	playNote(NoteA, 3, 4);
+	playNote(NoteFs, 2, 4);
+
+	playNote(NoteD, 3, 4);
+	playNote(NoteCs, 3, 2);
+	playNote(NoteB, 3, 2);
+	playNote(NoteCs, 3, 8);
+
+	playNote(NoteD, 3, 4);
+	playNote(NoteCs, 3, 2);
+	playNote(NoteB, 3, 2);
+	playNote(NoteA, 3, 4);
+	playNote(NoteFs, 2, 4);
+
+	playNote(NoteE, 2, 6);
+	playNote(NoteD, 2, 2);
+	playNote(NoteE, 2, 4);
+	playNote(NoteA, 3, 4);
+
+	playNote(NoteD, 3, 4);
+	playNote(NoteCs, 3, 2);
+	playNote(NoteB, 3, 2);
+	playNote(NoteA, 3, 4);
+	playNote(NoteFs, 2, 2);
+	playNote(NoteCs, 3, 1);
+	playNote(NoteA, 3, 1);
+
+	playNote(NoteD, 3, 4);
+	playNote(NoteCs, 3, 2);
+	playNote(NoteB, 3, 2);
+	playNote(NoteCs, 3, 2);
+	playNote(NoteFs, 2, 2);
+	playNote(NoteD, 3, 2);
+	playNote(NoteE, 3, 2);
+
+	playNote(NoteFs, 3, 2);
+	pause(2);
+	playNote(NoteFs, 3, 2);
+	pause(2);
+	playNote(NoteFs, 3, 2);
+	playNote(NoteE, 3, 2);
+	playNote(NoteA, 4, 2);
+	playNote(NoteFs, 3, 2);
+
+	playNote(NoteD, 3, 6);
+	playNote(NoteE, 3, 1);
+	playNote(NoteD, 3, 1);
+	playNote(NoteCs, 3, 4);
+	playNote(NoteA, 3, 4);
+
+	playNote(NoteB, 3, 10);
+	pause(22);
+
+}
 
 ///////////////////////////////
 //////////MAIN LOOP////////////
 ///////////////////////////////
 void loop()
 {
-	int  c = Serial.read();
-	switch (c)
-	{
-	case '-':
-	{
-		remoteStep--;
-		if (remoteStep == 0)
-			remoteStep = 1;
-		Serial.print("Stepsize: ");
-		Serial.println(remoteStep);
-		break;
-	}
-	case '+':
-	{
-		remoteStep++;
-		Serial.print("Stepsize: ");
-		Serial.println(remoteStep);
-		break;
-	}
-	case '7':
-	{
-		motorSpeed -= remoteStep;
-		if (motorSpeed < 0)
-			motorSpeed = 0;
-		Serial.print("Motorspeed: ");
-		Serial.println(motorSpeed);
-		break;
-	}
-	case '9':
-	{
-		motorSpeed += remoteStep;
-		if (motorSpeed > myStepper.maxSpeed())
-			motorSpeed = myStepper.maxSpeed();
-		Serial.print("Motorspeed: ");
-		Serial.println(motorSpeed);
-		break;
-	}
-	case '0':
-	{
-		motorSpeed = 0;
-		Serial.print("Motorspeed: ");
-		Serial.println(motorSpeed);
-		grabberNeutral();
-		armNeutral();
-		break;
-	}
-	case '4':
-	{
-		grabPos += remoteStep;
-		grabberTurnPos(grabPos);
-		break;
-	}
-	case '6':
-	{
-		grabPos -= remoteStep;
-		grabberTurnPos(grabPos);
-		break;
-	}
-	case '8':
-	{
-		Serial.print("arm offset: ");
-		Serial.print(armOffset);
-		Serial.print("  ");
-		armPos += remoteStep;
-		armTurnPos(armPos);
-		break;
-	}
-	case '2':
-	{
-		Serial.print("arm offset: ");
-		Serial.print(armOffset);
-		Serial.print("  ");
-		armPos -= remoteStep;
-		armTurnPos(armPos);
-		break;
-	}
-	case '5':
-	{
-		Serial.println("turning one round @60RPM: ");
-		myStepper.setSpeed(60 * rpm2steps);
-		myStepper.move(stepsPerRevolution);
-		myStepper.runSpeedToPosition();
-		break;
-	}
-	case 'g':
-	{
-		r_Grab();
-		break;
-	}
-	case 'r':
-	{
-		RPMtester(myStepper);
-		break;
-	}
-	case '*':
-	{
-		sensors.requestTemperatures(); // Send the command to get temperatures
-		Serial.print("Temperature for the Steppermotor is: ");
-		Serial.println(sensors.getTempCByIndex(0));
-		break;
-	}
-	case '.':
-	{
-		Serial.println("Locking the motor for 1 second");
-		myStepper.setSpeed(0);
-		myStepper.move(1);
-		myStepper.move(-1);
-		unsigned long previousMillis = millis();
-		while (millis() - previousMillis <= 1000)
-			myStepper.runSpeed();
-		myStepper.disableOutputs();
-		break;
-	}
-	case '/':
-	{
-		Serial.println("Swithcing motor direction");
-		motorDirection *= -1;
-		break;
-	case '[':
-	{
-		Serial.println("Reseting motor position to 0");
-		myStepper.setCurrentPosition(myStepper.currentPosition());
-		break;
-	}
-	case ']':
-	{
-		Serial.print("Current motor position: ");
-		Serial.println(myStepper.currentPosition());
-		break;
-	}
-	case '3':
-	{
-		Serial.println("Extending arm ");
-		myStepper.move(-1050);
-		while (myStepper.distanceToGo())
-			myStepper.run();
-		break;
-	}
-	case '1':
-	{
-		Serial.println("Retracting arm ");
-		myStepper.move(1050);
-		while (myStepper.distanceToGo())
-			myStepper.run();
-		break;
-	}
-	}
-	}
-	// set the motor speed in RPM:
-	if (motorSpeed > 0) {
-		myStepper.setSpeed(motorDirection * motorSpeed * rpm2steps);
-		myStepper.runSpeed();			//Run motor at set speed.		
-	}
-	else
-		myStepper.disableOutputs();
+	playZelda();
+	playHappyBirthday();
+	playOriBlindForest();
 }
 
 
