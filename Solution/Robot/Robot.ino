@@ -82,6 +82,8 @@ void setup()										// Built in initialization block
 	Serial.println(" -Max speed:\t");
 
 	Serial.println("Ariel has started");
+
+	pinMode(A1, OUTPUT);
 }
 
 
@@ -207,6 +209,10 @@ void loop()
 	{
 		Serial.println("Swithcing motor direction");
 		motorDirection *= -1;
+		if (motorDirection)
+			digitalWrite(A1, HIGH);
+		else
+			digitalWrite(A1, LOW);
 		break;
 	case '[':
 	{
