@@ -5,38 +5,34 @@
 */
 
 #define Servo ServoTimer2
-#define DEBUG true
-#define FEEDBACK true
+bool DEBUG = true;
+bool FEEDBACK = true;
 
 #include <ServoTimer2.h>							// Include servo library
-#include <Stepper.h>
-#include <SPI.h>
-#include <OneWire\OneWire.h>
-#include <DallasTemperatureControl\DallasTemperature.h>
+#include <AccelStepper.h>							// AccelStepper library for precise and fluid steppercontrol
+#include <SPI.h>									// The SPI-communication liberary for the antenna
+#include <OneWire\OneWire.h>						// The OneWire-protocol used by te temp sensor
+#include <DallasTemperatureControl\DallasTemperature.h>	// DallasTemperature library for controlling the DS18S20 temperature monitor
 
-void RPMtester(Stepper &driver);
-// Setup a oneWire instance to communicate with any OneWire devices 
-// (not just Maxim/Dallas temperature ICs)
-OneWire oneWire(A0);
-
-// Pass our oneWire reference to Dallas Temperature.
-DallasTemperature sensors(&oneWire);
-
+void RPMtester(AccelStepper driver);				// Small RPM that tests the Acceleration.
+OneWire oneWire(A0);								// Setup a oneWire instance to communicate with any OneWire devices 
+DallasTemperature sensors(&oneWire);				// Pass the oneWire reference to Dallas Temperature.							
+AccelStepper myStepper(AccelStepper::FULL4WIRE, 2, 4, 6, 7, FALSE);	// initialize the stepper library on pins 2,4,6,7 and disable the output;
 Servo servoArm;										// Arm servo signal
-Servo servoGrab;									// Grabbbing 
+Servo servoGrab;									// Grabbbing Servo
 const int delayRest = 100;							// Standard delay for momentum to stablelize
 const int armNeutralPosition = 90;					// Neutral position of the grabber
 const int grabberNeutralPosition = 60;				// Ground position of the grabber
 const int grabberGrabPosition = 0;					// Position for closed grabbers
 const int armOffset = 0;							// turn ofset for the head in degrees
-const float pi = 3.141592654;						// this one is a piece of cake
 const int stepsPerRevolution = 200;					// change this to fit the number of steps per revolution for your motor
-Stepper myStepper(stepsPerRevolution, 2, 4, 6, 7);	// initialize the stepper library on pins 8 through 11:
+const float pi = 3.141592654;						// this one is a piece of cake
 			
 int stepCount = 0;									// number of steps the motor has taken
 int motorSpeed = 0;									// Speed of the motor in RPM
 int motorDirection = 1;								// direction of the motor
 unsigned long previousMillis = 0;					// will store last time LED was updatedvccv
+float rpm2steps = stepsPerRevolution / 60.0f;
 
 /////////////////////////////////
 ///USER DETERMINED VARIABLES/////
@@ -50,38 +46,41 @@ int remoteStep = 5;
 void setup()										// Built in initialization block
 {
 	Serial.begin(9600);								// open the serial port at 9600 bps:
-	nrf24Initialize();
-	
+	Serial.println("Booting Ariel: Commencing setup");
+	Serial.println(" -Starting Ariel\nSerial port is open @9600.");
+
+	nrf24Initialize();								// Radio initialisation fuction
+
+	Serial.print(" -Attaching Arm Servo:\t");
 	servoArm.attach(3);								// Attach Arm signal to the pin
+	if (!servoArm.attached())
+		Serial.println("servoArm attach failed");
+	else
+		Serial.println("OK");
 	servoGrab.attach(5);							// Attach Grab signal to the pin
+	Serial.print(" -Attaching Arm Servo:\t");
+	if (!servoGrab.attached())
+		Serial.println("servoGrab attach failed");
+	else
+		Serial.println("OK");
 
-	// Start up the library
-	sensors.begin();
-}
+	sensors.begin();								// Initialise the temperaturesensor bus
 
-void loop() {
+	myStepper.setMaxSpeed(220 * rpm2steps);
+	Serial.println(" -Max speed:\t");
+	Serial.println(myStepper.maxSpeed());
+	myStepper.setAcceleration(350);
+	Serial.println(" -Max speed:\t");
 
-	uint8_t data[256];
-	uint8_t len;
-	while (!nrf24ReceiveMessage(data, &len)) {}
-	Serial.println((char*)data);
-
-	delay(1000);
+	Serial.println("Ariel has started");
 }
 
 
 ///////////////////////////////
 //////////MAIN LOOP////////////
 ///////////////////////////////
-void loop2()
+void loop()
 {
-	/*unsigned long currentMillis = millis();
-
-	if (currentMillis - previousMillis >= 5000) {
-		previousMillis = currentMillis;
-		sentAndWait(500);
-	}*/
-
 	int  c = Serial.read();
 	switch (c)
 	{
@@ -113,6 +112,8 @@ void loop2()
 	case '9':
 	{
 		motorSpeed += remoteStep;
+		if (motorSpeed > myStepper.maxSpeed())
+			motorSpeed = myStepper.maxSpeed();
 		Serial.print("Motorspeed: ");
 		Serial.println(motorSpeed);
 		break;
@@ -158,33 +159,83 @@ void loop2()
 	}
 	case '5':
 	{
-		Serial.println("turning one round: ");
-		myStepper.setSpeed(60);
-		myStepper.step(stepsPerRevolution);
+		Serial.println("turning one round @60RPM: ");
+		myStepper.setSpeed(60 * rpm2steps);
+		myStepper.move(stepsPerRevolution);
+		myStepper.runSpeedToPosition();
+		break;
+	}
+	case 'g':
+	{
+		r_Grab();
 		break;
 	}
 	case 'r':
 	{
-		Serial.println("testing RPM: ");
-		myStepper.setSpeed(60);
-		myStepper.step(stepsPerRevolution);
-		//RPMtester(myStepper);
+		RPMtester(myStepper);
 		break;
 	}
 	case '*':
 	{
 		sensors.requestTemperatures(); // Send the command to get temperatures
-		Serial.print("Temperature for Device 1 is: ");
+		Serial.print("Temperature for the Steppermotor is: ");
 		Serial.println(sensors.getTempCByIndex(0));
 		break;
+	}
+	case '.':
+	{
+		Serial.println("Locking the motor for 1 second");
+		myStepper.setSpeed(0);
+		myStepper.move(1);
+		myStepper.move(-1);
+		unsigned long previousMillis = millis();
+		while (millis() - previousMillis <= 1000)
+			myStepper.runSpeed();
+		myStepper.disableOutputs();
+		break;
+	}
+	case '/':
+	{
+		Serial.println("Swithcing motor direction");
+		motorDirection *= -1;
+		break;
+	case '[':
+	{
+		Serial.println("Reseting motor position to 0");
+		myStepper.setCurrentPosition(myStepper.currentPosition());
+		break;
+	}
+	case ']':
+	{
+		Serial.print("Current motor position: ");
+		Serial.println(myStepper.currentPosition());
+		break;
+	}
+	case '3':
+	{
+		Serial.println("Extending arm ");
+		myStepper.move(-1050);
+		while (myStepper.distanceToGo())
+			myStepper.run();
+		break;
+	}
+	case '1':
+	{
+		Serial.println("Retracting arm ");
+		myStepper.move(1050);
+		while (myStepper.distanceToGo())
+			myStepper.run();
+		break;
+	}
 	}
 	}
 	// set the motor speed in RPM:
 	if (motorSpeed > 0) {
-		myStepper.setSpeed(motorSpeed);
-		// step 1/100 of a revolution:
-		myStepper.step(motorDirection*stepsPerRevolution / 100);
+		myStepper.setSpeed(motorDirection * motorSpeed * rpm2steps);
+		myStepper.runSpeed();			//Run motor at set speed.		
 	}
+	else
+		myStepper.disableOutputs();
 }
 
 

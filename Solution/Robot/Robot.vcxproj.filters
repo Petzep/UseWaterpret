@@ -15,14 +15,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="__vm\.Robot.vsarduino.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Robot.ino" />
     <None Include="functions.ino" />
     <None Include="routine.ino" />
     <None Include="..\Shared\nrf24communication.ino" />
+    <None Include="Robot.ino" />
   </ItemGroup>
 </Project>

@@ -1,19 +1,29 @@
 #include <RH_NRF24.h>
 
-RH_NRF24 nrf24;
+RH_NRF24 nrf24;										// Singleton instance of the radio driver.
 
 #ifndef DEBUG
 #define DEBUG true
 #endif
 
 bool nrf24Initialize() {
-	if (!nrf24.init())
+	Serial.print(" -Initiating radio:\t");
+	if (nrf24.init())								// Defaults after init are 2.402 GHz (channel 2), 2Mbps, 0dBm
+	{
+		Serial.println("OK");
+		Serial.print(" -Setting radio channel:\t");
+		if (!nrf24.setChannel(1))
+			Serial.println("setChannel failed");
+		else
+			Serial.println("Channel 1");
+		Serial.print(" -Setting radio settings:\t");
+		if (!nrf24.setRF(RH_NRF24::DataRate2Mbps, RH_NRF24::TransmitPower0dBm))
+			Serial.println("setRF failed");
+		else
+			Serial.println("2Mbps, 0dBm");
+	}
+	else
 		Serial.println("init failed");
-	// Defaults after init are 2.402 GHz (channel 2), 2Mbps, 0dBm
-	if (!nrf24.setChannel(1))
-		Serial.println("setChannel failed");
-	if (!nrf24.setRF(RH_NRF24::DataRate2Mbps, RH_NRF24::TransmitPower0dBm))
-		Serial.println("setRF failed");
 }
 
 bool compareBuffers(uint8_t *buf1, uint8_t *buf2, uint8_t len) {
