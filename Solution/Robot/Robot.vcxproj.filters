@@ -19,6 +19,7 @@
     <None Include="routine.ino" />
     <None Include="..\Shared\nrf24communication.ino" />
     <None Include="Robot.ino" />
+    <None Include="CommandBook.ino" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.Robot.vsarduino.h">

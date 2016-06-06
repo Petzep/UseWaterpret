@@ -69,3 +69,18 @@ void leBlink(int ledPin, int n)
 		delay(100);						// wait for a second
 	}
 }
+
+/*not used
+void setTemperatureAlarm(int temp)
+{
+	sensors.setLowAlarmTemp(motor1Temp, -10);
+	sensors.setHighAlarmTemp(motor1Temp, temp);
+}
+
+void checkAlarm()
+{
+	if (sensors.hasAlarm())
+	{
+		Serial.println("ALARM ON MOTOR 1");
+	}
+}*/

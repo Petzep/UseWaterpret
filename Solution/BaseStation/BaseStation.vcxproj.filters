@@ -20,10 +20,10 @@
     <None Include="menu.ino" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="__vm\.BaseStation.vsarduino.h">
+    <ClInclude Include="CustomNumericMenuItem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CustomNumericMenuItem.h">
+    <ClInclude Include="__vm\.BaseStation.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
