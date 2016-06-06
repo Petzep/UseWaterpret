@@ -8,22 +8,67 @@
 
 #define ENABLE_DEBUG
 
-// RH_NRF24 nrf24(8, 7); // use this to be electrically compatible with Mirf
-// RH_NRF24 nrf24(8, 10);// For Leonardo, need explicit SS pin
-// RH_NRF24 nrf24(8, 7); // For RFM73 on Anarduino Mini
+//menu
+#include <MenuSystem.h>
+#include "CustomNumericMenuItem.h"
+
+// forward declarations
+const String format_float(const float value);
+const String format_int(const float value);
+const String format_color(const float value);
+void display_menu(Menu* p_menu);
+void on_testMessage_selected(MenuItem* p_menu_item);
+void on_otherMessage_selected(MenuItem* p_menu_item);
+void on_status_selected(MenuItem* p_menu_item);
+void on_back_item_selected(MenuItem* p_menu_item);
+void on_help_selected(MenuItem* p_menu_item);
+void on_about_selected(MenuItem* p_menu_item);
+
+// Menu variables
+MenuSystem ms;
+Menu mm("Main Menu", &display_menu);
+Menu muMessages(">Messages", &display_menu);
+	MenuItem muMessages_test("-Send test message", &on_testMessage_selected);
+	MenuItem muMessages_otherTest("-Send another test message", &on_otherMessage_selected);
+	BackMenuItem muMessages_back(" -Back-", &on_back_item_selected, &ms);
+Menu muRobot(">Robot", &display_menu);
+	MenuItem muRobot_status("-Status", &on_status_selected);
+	NumericMenuItem muRobot_kleur("-Kleurselector", 0, 0, 2, 1, format_color);
+	CustomNumericMenuItem muRobot_speed(12, "Max Speed (slider)", 300, 200, 400, 20, format_int);
+	NumericMenuItem muRobot_temp("Max Temp", 100.0, 60.0, 80.0, 0.2, format_float);
+	NumericMenuItem muRobot_accel("Acceleration", 350, 300, 400, 25, format_int);
+	BackMenuItem muRobot_back(" -Back-", &on_back_item_selected, &ms);
+MenuItem mm_help("-help", &on_help_selected);
+MenuItem mm_about("-About", &on_about_selected);
 
 void setup()
 {
 	Serial.begin(9600);
-	while (!Serial)
-		; // wait for serial port to connect. Needed for Leonardo only
 	nrf24Initialize();
+
+	mm.add_menu(&muMessages);
+		muMessages.add_item(&muMessages_test);
+		muMessages.add_item(&muMessages_otherTest);
+		muMessages.add_item(&muMessages_back);
+	mm.add_menu(&muRobot);
+		muRobot.add_item(&muRobot_status);
+		muRobot.add_item(&muRobot_kleur);
+		muRobot.add_item(&muRobot_accel);
+		muRobot.add_item(&muRobot_speed);
+		muRobot.add_item(&muRobot_back);
+	mm.add_item(&mm_help);
+	mm.add_item(&mm_about);
+	ms.set_root_menu(&mm);
+
+	display_help();
+	ms.display();
 }
 
 void loop() {
-	uint8_t* data = (uint8_t*) "Test bericht";
-	nrf24SendMessage(data, 13);
+	serial_handler();
 
-	delay(1000);
+
+
+
 }
 

@@ -20,4 +20,9 @@
     <None Include="..\Shared\nrf24communication.ino" />
     <None Include="Robot.ino" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="__vm\.Robot.vsarduino.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>
