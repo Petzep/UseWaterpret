@@ -39,6 +39,8 @@ void runCommand(CommandBook *book)
 			break;
 		}
 		}
+		book[i].command = NULL;
+		book[i].value = NULL;
 	}
 }
 

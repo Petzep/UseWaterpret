@@ -38,7 +38,7 @@ OneWire oneWire(A0);								// Setup a oneWire instance to communicate with any 
 DallasTemperature sensors(&oneWire);				// Pass the oneWire reference to Dallas Temperature.							
 AccelStepper myStepper(AccelStepper::FULL4WIRE, 2, 4, 6, 7, FALSE);	// initialize the stepper library on pins 2,4,6,7 and disable the output;
 DeviceAddress motor1Temp;							// arrays to hold device addresses of the TempSensors
-CommandBook commandos[10] = {};
+CommandBook commandos[BOOKSIZE] = {};
 Servo servoArm;										// Arm servo signal
 Servo servoGrab;									// Grabbbing Servo
 const int delayRest = 100;							// Standard delay for momentum to stablelize
@@ -68,7 +68,7 @@ void setup()										// Built in initialization block
 {
 	Serial.begin(9600);								// open the serial port at 9600 bps:
 	Serial.println(F("Booting Ariel: Commencing setup"));
-	Serial.println(F(" -Starting Ariel\nSerial port is open @9600."));
+	Serial.println(F(" -Starting Ariel\n -Serial port is open @9600."));
 
 	nrf24Initialize();								// Radio initialisation fuction
 
@@ -102,7 +102,7 @@ void setup()										// Built in initialization block
 	Serial.println(F(" -Max speed:\t"));
 	Serial.println(myStepper.maxSpeed());
 	myStepper.setAcceleration(350);
-	Serial.println(F(" -Max speed:\t"));
+	Serial.println(F(" -Acceleration:\t350"));
 
 	Serial.println(F("Ariel has started"));
 }
