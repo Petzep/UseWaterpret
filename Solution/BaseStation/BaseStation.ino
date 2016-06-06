@@ -61,7 +61,7 @@ Menu muMessages(">Messages", &display_menu);
 Menu muRobot(">Robot", &display_menu);
 	Menu muCommand(">Command Builder", &display_menu);
 		NumericMenuItem muCommand_type("-Command type", 0, 0, 5, 1, format_type);
-		NumericMenuItem muCommand_value("value", 0, 500, 2000, 50, format_value);
+		NumericMenuItem muCommand_value("value", -1500, 0, 1500, 100, format_value);
 		MenuItem muCommand_add("-Add command to CommandBook", &on_add_selected);
 		MenuItem muCommand_print("-print CommandBook", &on_print_selected);
 		MenuItem muCommand_sent("-sent CommandBook", &on_sent_selected);
