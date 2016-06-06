@@ -18,6 +18,7 @@
     <None Include="BaseStation.ino" />
     <None Include="..\Shared\nrf24communication.ino" />
     <None Include="menu.ino" />
+    <None Include="..\Shared\CommandBook.ino" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CustomNumericMenuItem.h">

@@ -7,6 +7,23 @@
 #include <SPI.h>
 
 #define ENABLE_DEBUG
+#define BOOKSIZE 10
+#define BASESTATION
+
+#ifdef ENABLE_DEBUG
+// disable Serial output
+#define debugln(a) (Serial.println(a))
+#define debug(a) (Serial.print(a))
+#else
+#define debugln(a)
+#define debug(a)
+#endif
+
+struct CommandBook
+{
+	char command;
+	int value;
+}tempCommand;
 
 //menu
 #include <MenuSystem.h>
@@ -16,6 +33,8 @@
 const String format_float(const float value);
 const String format_int(const float value);
 const String format_color(const float value);
+const String format_type(const float value);
+const String format_value(const float value);
 void display_menu(Menu* p_menu);
 void on_testMessage_selected(MenuItem* p_menu_item);
 void on_otherMessage_selected(MenuItem* p_menu_item);
@@ -23,6 +42,14 @@ void on_status_selected(MenuItem* p_menu_item);
 void on_back_item_selected(MenuItem* p_menu_item);
 void on_help_selected(MenuItem* p_menu_item);
 void on_about_selected(MenuItem* p_menu_item);
+void on_add_selected(MenuItem* p_menu_item);
+void on_print_selected(MenuItem* p_menu_item);
+void on_sent_selected(MenuItem* p_menu_item);
+void addCommand(CommandBook *book, char command, int value);
+int countCommand(CommandBook *book);
+void runCommand(CommandBook *book);
+void printCommand(CommandBook *book);
+CommandBook commandos[BOOKSIZE] = {};				// array with commands for the Arduino
 
 // Menu variables
 MenuSystem ms;
@@ -32,6 +59,12 @@ Menu muMessages(">Messages", &display_menu);
 	MenuItem muMessages_otherTest("-Send another test message", &on_otherMessage_selected);
 	BackMenuItem muMessages_back(" -Back-", &on_back_item_selected, &ms);
 Menu muRobot(">Robot", &display_menu);
+	Menu muCommand(">Command Builder", &display_menu);
+		NumericMenuItem muCommand_type("-Command type", 0, 0, 5, 1, format_type);
+		NumericMenuItem muCommand_value("value", 0, 500, 2000, 50, format_value);
+		MenuItem muCommand_add("-Add command to CommandBook", &on_add_selected);
+		MenuItem muCommand_print("-print CommandBook", &on_print_selected);
+		MenuItem muCommand_sent("-sent CommandBook", &on_sent_selected);
 	MenuItem muRobot_status("-Status", &on_status_selected);
 	NumericMenuItem muRobot_kleur("-Kleurselector", 0, 0, 2, 1, format_color);
 	CustomNumericMenuItem muRobot_speed(12, "Max Speed (slider)", 300, 200, 400, 20, format_int);
@@ -51,6 +84,12 @@ void setup()
 		muMessages.add_item(&muMessages_otherTest);
 		muMessages.add_item(&muMessages_back);
 	mm.add_menu(&muRobot);
+		muRobot.add_menu(&muCommand);
+			muCommand.add_item(&muCommand_type);
+			muCommand.add_item(&muCommand_value);
+			muCommand.add_item(&muCommand_add);
+			muCommand.add_item(&muCommand_print);
+			muCommand.add_item(&muCommand_sent);
 		muRobot.add_item(&muRobot_status);
 		muRobot.add_item(&muRobot_kleur);
 		muRobot.add_item(&muRobot_accel);

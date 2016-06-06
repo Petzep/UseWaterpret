@@ -15,8 +15,8 @@ struct CommandBook
 
 #ifdef ENABLE_DEBUG
 // disable Serial output
-#define debugln(a) (Serial.println(F(a))
-#define debug(a) (Serial.print(F(a))
+#define debugln(a) (Serial.println(a))
+#define debug(a) (Serial.print(a))
 #else
 #define debugln(a)
 #define debug(a)
@@ -38,7 +38,7 @@ OneWire oneWire(A0);								// Setup a oneWire instance to communicate with any 
 DallasTemperature sensors(&oneWire);				// Pass the oneWire reference to Dallas Temperature.							
 AccelStepper myStepper(AccelStepper::FULL4WIRE, 2, 4, 6, 7, FALSE);	// initialize the stepper library on pins 2,4,6,7 and disable the output;
 DeviceAddress motor1Temp;							// arrays to hold device addresses of the TempSensors
-CommandBook commandos[BOOKSIZE] = {};
+CommandBook commandos[BOOKSIZE] = {};				// array with commands for the Arduino
 Servo servoArm;										// Arm servo signal
 Servo servoGrab;									// Grabbbing Servo
 const int delayRest = 100;							// Standard delay for momentum to stablelize
@@ -47,6 +47,7 @@ const int grabberNeutralPosition = 60;				// Ground position of the grabber
 const int grabberGrabPosition = 0;					// Position for closed grabbers
 const int armOffset = 0;							// turn ofset for the head in degrees
 const int stepsPerRevolution = 200;					// change this to fit the number of steps per revolution for your motor
+const int acceleration = 350;						// Acceleration
 const float pi = 3.141592654;						// this one is a piece of cake
 			
 int stepCount = 0;									// number of steps the motor has taken
@@ -67,8 +68,9 @@ int remoteStep = 5;
 void setup()										// Built in initialization block
 {
 	Serial.begin(9600);								// open the serial port at 9600 bps:
-	Serial.println(F("Booting Ariel: Commencing setup"));
-	Serial.println(F(" -Starting Ariel\n -Serial port is open @9600."));
+	Serial.println(F("Booting Ariel:"));
+	Serial.println(F(" -Starting Ariel"));
+	Serial.println(F(" -Serial port is open @9600."));
 
 	nrf24Initialize();								// Radio initialisation fuction
 
@@ -99,10 +101,11 @@ void setup()										// Built in initialization block
 
 
 	myStepper.setMaxSpeed(220 * rpm2steps);
-	Serial.println(F(" -Max speed:\t"));
+	Serial.print(F(" -Max speed:\t"));
 	Serial.println(myStepper.maxSpeed());
 	myStepper.setAcceleration(350);
-	Serial.println(F(" -Acceleration:\t350"));
+	Serial.print(F(" -Acceleration:\t"));
+	Serial.println(acceleration);
 
 	Serial.println(F("Ariel has started"));
 }

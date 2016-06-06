@@ -2,28 +2,24 @@
 
 RH_NRF24 nrf24;										// Singleton instance of the radio driver.
 
-#ifndef DEBUG
-#define DEBUG true
-#endif
-
 bool nrf24Initialize() {
-	Serial.print(" -Initiating radio:\t");
+	Serial.print(F(" -Initiating radio:\t"));
 	if (nrf24.init())								// Defaults after init are 2.402 GHz (channel 2), 2Mbps, 0dBm
 	{
-		Serial.println("OK");
-		Serial.print(" -Setting radio channel:\t");
+		Serial.println(F("OK"));
+		Serial.print(F(" -Setting radio channel:\t"));
 		if (!nrf24.setChannel(1))
-			Serial.println("setChannel failed");
+			Serial.println(F("setChannel failed"));
 		else
-			Serial.println("Channel 1");
-		Serial.print(" -Setting radio settings:\t");
+			Serial.println(F("Channel 1"));
+		Serial.print(F(" -Setting radio settings:\t"));
 		if (!nrf24.setRF(RH_NRF24::DataRate2Mbps, RH_NRF24::TransmitPower0dBm))
-			Serial.println("setRF failed");
+			Serial.println(F("setRF failed"));
 		else
-			Serial.println("2Mbps, 0dBm");
+			Serial.println(F("2Mbps, 0dBm"));
 	}
 	else
-		Serial.println("init failed");
+		Serial.println(F("init failed"));
 }
 
 bool compareBuffers(uint8_t *buf1, uint8_t *buf2, uint8_t len) {
@@ -39,9 +35,7 @@ bool nrf24ReceiveMessage(uint8_t* str, uint8_t* len) {
 	// receive a message or timeout after 5 seconds
 	unsigned long time = millis();
 
-	if (DEBUG) {
-		Serial.println("Receiving message..");
-	}
+	debugln("Receiving message..");
 
 	if (!nrf24.waitAvailableTimeout(5000)) {
 		return false;
@@ -51,24 +45,22 @@ bool nrf24ReceiveMessage(uint8_t* str, uint8_t* len) {
 		return false;
 	}
 
-	if (DEBUG) {
-		Serial.println("Message received.");
-		Serial.print(" Length: ");
-		Serial.println((int) len);
-		Serial.print(" Message: ");
-		Serial.println((char *)str);
-	}
+	debugln("Message received.");
+	debug(" Length: ");
+	debugln((int) len);
+	debug(" Message: ");
+	debugln((char *)str);
 
 	uint8_t* buf;
 	uint8_t blen;
-	while (true) {
-		if (DEBUG) {
-			Serial.println("Attempting confirmation..");
-		}
+	while (true)
+	{
+		debugln("Attempting confirmation..");
+
 		nrf24.send(str, *len);
 		delay(100);
 		if (millis() > time + 5000L && millis() >= time) {
-			Serial.println("5 second timeout");
+			debugln("5 second timeout");
 			return false;
 		}
 		if (nrf24.waitAvailableTimeout(100)) {
@@ -81,9 +73,7 @@ bool nrf24ReceiveMessage(uint8_t* str, uint8_t* len) {
 			if (!compareBuffers(buf, (uint8_t*) "OKSTOP", 7)) {
 				continue;
 			}
-			if (DEBUG) {
-				Serial.println("Receiving message..");
-			}
+			debugln("Receiving message..");
 			break;
 		}
 	}
@@ -100,21 +90,17 @@ bool nrf24SendMessage(uint8_t* str, uint8_t len) {
 	bool success = false;
 	unsigned long time = millis();
 
-	if (DEBUG) {
-		Serial.println("Sending message..");
-	}
+	debugln("Sending message..");
 
 	while (!success) {
-		if (DEBUG) {
-			Serial.println("Attemp started..");
-		}
+		debugln("Attemp started..");
+		
 		// send the message and wait until we have a message available
 		do {
 			nrf24.send(str, len);
 			if (millis() > time + 5000L && millis() >= time) {
-				if (DEBUG) {
-					Serial.println("5 second timeout");
-				}
+				debugln("5 second timeout");
+				
 				return false;
 			}
 		} while (!nrf24.waitAvailableTimeout(100));
@@ -126,13 +112,13 @@ bool nrf24SendMessage(uint8_t* str, uint8_t len) {
 			continue;
 		}
 
-		if (DEBUG) {
-			Serial.println("Message received.");
-			Serial.print(" Length: ");
-			Serial.println((int)blen);
-			Serial.print(" Message: ");
-			Serial.println((char *)buf);
-		}
+		
+		debugln("Message received.");
+		debug(" Length: ");
+		debugln((int)blen);
+		debug(" Message: ");
+		debugln((char *)buf);
+		
 		
 
 		// if the received message is not our message, repeat our message
@@ -145,12 +131,10 @@ bool nrf24SendMessage(uint8_t* str, uint8_t len) {
 
 		// success! notify the other party that they can stop confirming the message and timeout after a second
 		do {
-			if (DEBUG) {
-				Serial.println("Attempt confirmation.");
-			}
+			debugln("Attempt confirmation.");
 			nrf24.send((uint8_t*) "OKSTOP", 7);
 			if (millis() > time + 5000L && millis() >= time) {
-				Serial.println("5 second timeout");
+				debugln("5 second timeout");
 				break;
 			}
 		} while (!nrf24.waitAvailableTimeout(100));
@@ -161,9 +145,8 @@ bool nrf24SendMessage(uint8_t* str, uint8_t len) {
 		}
 
 		success = true;
-		if (DEBUG) {
-			Serial.println("Message succesfully sent.");
-		}
+		debugln("Message succesfully sent.");
+		
 	}
 
 	return true;

@@ -30,13 +30,13 @@ const String format_color(const float value)
 	switch ((int)value)
 	{
 	case 0:
-		buffer += "Grab plant";
+		buffer += "Red";
 		break;
 	case 1:
-		buffer += "Go to plant";
+		buffer += "Green";
 		break;
 	case 2:
-		buffer += "Return home";
+		buffer += "Blue";
 		break;
 	default:
 		buffer += "undef";
@@ -45,18 +45,81 @@ const String format_color(const float value)
 	return buffer;
 }
 
+const String format_type(const float value)
+{
+	String buffer;
+
+	switch ((int)value)
+	{
+	case 0:
+		buffer += "Go to plant";
+		tempCommand.command = 'x';
+		break;
+	case 1:
+		buffer += "Grab plant";
+		tempCommand.command = 'x';
+		break;
+	case 2:
+		buffer += "Clean plant";
+		tempCommand.command = 'x';
+		break;
+	case 3:
+		buffer += "Return home";
+		tempCommand.command = 'x';
+		break;
+	case 4:
+		buffer += "move";
+		tempCommand.command = 'm';
+		break;
+	case 5:
+		buffer += "delay";
+		tempCommand.command = 'd';
+		break;
+	default:
+		buffer += "undef";
+	}
+
+	return buffer;
+}
+
+const String format_value(const float value)
+{
+	tempCommand.value =(int)value;
+	return String((int)value);
+}
+
 // In this example all menu items use the same callback.
+void on_add_selected(MenuItem* p_menu_item)
+{
+	addCommand(commandos, tempCommand.command, tempCommand.value);
+	Serial.println(F("Command added"));
+	delay(1000);
+}
+
+void on_print_selected(MenuItem* p_menu_item)
+{
+	printCommand(commandos);
+	delay(1000);
+}
+
+void on_sent_selected(MenuItem* p_menu_item)
+{
+	Serial.println(F("Commands sended"));
+	delay(1000);
+}
 
 void on_testMessage_selected(MenuItem* p_menu_item)
 {
 	uint8_t* data = (uint8_t*) "Test bericht";
 	nrf24SendMessage(data, 13);
 	Serial.println(F("Message sent"));
+	delay(1000);
 }
 
 void on_help_selected(MenuItem* p_menu_item)
 {
-	ms.display();
+	display_help();
+	delay(3000);
 }
 
 void on_about_selected(MenuItem* p_menu_item)
@@ -67,13 +130,14 @@ void on_about_selected(MenuItem* p_menu_item)
 
 void on_otherMessage_selected(MenuItem* p_menu_item)
 {
-	Serial.println(F("Other test message. (not sent #placeholder"));
+	Serial.println(F("Other test message. (not sent #placeholder)"));
 	delay(1000);
 }
 
+
 void on_status_selected(MenuItem* p_menu_item)
 {
-	Serial.println(F("(Returning status of the robot:<placeholder>"));
+	Serial.println(F("Returning status of the robot:<placeholder>"));
 	Serial.println(F("------------------------------"));
 	Serial.print(F("Temperature: "));
 	Serial.println("80");
@@ -91,7 +155,7 @@ void on_status_selected(MenuItem* p_menu_item)
 	Serial.println("167");
 	Serial.print(F("MotorGrab: "));
 	Serial.println("086");
-	delay(1000);
+	delay(3000);
 }
 
 void on_back_item_selected(MenuItem* p_menu_item)
@@ -106,7 +170,7 @@ void display_menu(Menu* p_menu)
 	Serial.print("[2J");    // clear screen command
 	Serial.write(27);
 	Serial.print("[H");     // cursor to home command
-	Serial.print("\nCurrent menu name: ");
+	Serial.print(F("Current menu name: "));
 	Serial.println(p_menu->get_name());
 
 	String buffer;
@@ -160,8 +224,8 @@ void serial_handler()
 			break;
 		case '?':
 		case 'h': // Display help
-			display_help();
 			ms.display();
+			display_help();
 			break;
 		default:
 			break;
