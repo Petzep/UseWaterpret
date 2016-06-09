@@ -13,27 +13,12 @@ RH_NRF24 driver;
 RHReliableDatagram manager(driver);
 
 bool isServer;
-uint8_t buf[32];
-uint8_t blen = 0;
+uint8_t _nrf24_buf[32];
+uint8_t _nrf24_blen = 0;
 
 bool nrf24Initialize(bool server) {
-	if (!manager.init()) {
-		Serial.println(F("init failed"));
-		return false;
-	}
-
-	if (server) {
-		manager.setThisAddress(SERVER_ADDRESS);
-	}
-	else {
-		manager.setThisAddress(CLIENT_ADDRESS);
-	}
-	isServer = server;
-
-	// Defaults after init are 2.402 GHz (channel 2), 2Mbps, 0dBm
 	Serial.print(F(" -Initiating radio:\t"));
-	if (driver.init())								// Defaults after init are 2.402 GHz (channel 2), 2Mbps, 0dBm
-	{
+	if (manager.init()) {
 		Serial.println(F("OK"));
 		Serial.print(F(" -Setting radio channel:\t"));
 		if (!driver.setChannel(1)) {
@@ -53,9 +38,18 @@ bool nrf24Initialize(bool server) {
 		}
 	}
 	else {
-		Serial.println(F("init failed"));
+		Serial.println(F("FAILED!!!"));
 		return false;
 	}
+
+	if (server) {
+		manager.setThisAddress(SERVER_ADDRESS);
+	}
+	else {
+		manager.setThisAddress(CLIENT_ADDRESS);
+	}
+	isServer = server;
+
 	return true;
 }
 
@@ -79,14 +73,13 @@ bool nrf24ReceiveMessage(uint8_t* str, uint8_t* len) {
 	if (!manager.waitAvailableTimeout(1000)) {
 		return false;
 	}
-	uint8_t * strbuf = (uint8_t*)malloc(32);
 
 	if (!manager.recvfromAck(str, len, &from)) {
 		debugln(F("Couldn't receive message"));
 		return false;
 	}
-	uint8_t* buf = (uint8_t *) "OK";
-	if (manager.sendtoWait(buf, 3, from)) {
+	uint8_t* _nrf24_buf = (uint8_t *) "OK";
+	if (manager.sendtoWait(_nrf24_buf, 3, from)) {
 		return true;
 	}
 	debugln(F("Did not receive acknowledgement on 'OK'"));
@@ -110,7 +103,7 @@ bool nrf24SendMessage(uint8_t* str, uint8_t len) {
 	}
 
 	uint8_t from;
-	if (manager.recvfromAck(buf, &blen, &from)) {
+	if (manager.recvfromAck(_nrf24_buf, &_nrf24_blen, &from)) {
 		return true;
 	}
 	debugln(F("Could not receive 'OK'"));

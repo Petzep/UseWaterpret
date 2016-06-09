@@ -30,10 +30,12 @@ struct CommandBook
 #include <DallasTemperatureControl\DallasTemperature.h>	// DallasTemperature library for controlling the DS18S20 temperature monitor
 
 void RPMtester(AccelStepper driver);				// Small RPM that tests the Acceleration.
-void addCommand(CommandBook *book, char command, int value);
+bool addCommand(CommandBook *book, char command, int value);
 int countCommand(CommandBook *book);
 void runCommand(CommandBook *book);
 void printCommand(CommandBook *book);
+bool deleteCommand(CommandBook *book);
+bool sendCommand(CommandBook *book);
 OneWire oneWire(A0);								// Setup a oneWire instance to communicate with any OneWire devices 
 DallasTemperature sensors(&oneWire);				// Pass the oneWire reference to Dallas Temperature.							
 AccelStepper myStepper(AccelStepper::FULL4WIRE, 2, 4, 6, 7, FALSE);	// initialize the stepper library on pins 2,4,6,7 and disable the output;
@@ -49,7 +51,7 @@ const int armOffset = 0;							// turn ofset for the head in degrees
 const int stepsPerRevolution = 200;					// change this to fit the number of steps per revolution for your motor
 const int acceleration = 350;						// Acceleration
 const float pi = 3.141592654;						// this one is a piece of cake
-			
+
 int stepCount = 0;									// number of steps the motor has taken
 int motorSpeed = 0;									// Speed of the motor in RPM
 int motorDirection = 1;								// direction of the motor
@@ -72,7 +74,7 @@ void setup()										// Built in initialization block
 	Serial.println(F(" -Starting Ariel"));
 	Serial.println(F(" -Serial port is open @9600."));
 
-	nrf24Initialize(false);								// Radio initialisation fuction
+	nrf24Initialize(false);								// Radio initialisation function
 
 	Serial.print(F(" -Attaching Arm Servo:\t"));
 	servoArm.attach(3);								// Attach Arm signal to the pin
@@ -90,7 +92,7 @@ void setup()										// Built in initialization block
 	sensors.begin();								// Initialise the temperaturesensor bus
 	if (!sensors.getAddress(motor1Temp, 0))			// Check if the temperaturesensors are connected.
 		Serial.println(F("Unable to find address for motor1Temp"));
-	
+
 	Serial.print(F(" -Connecting motor1Temp:\t"));
 	if (!sensors.isConnected(motor1Temp))
 		Serial.println(F("motor1Temp is not connected"));
@@ -110,11 +112,47 @@ void setup()										// Built in initialization block
 	Serial.println(F("Ariel has started"));
 }
 
+uint8_t* buf = new uint8_t[32];
+uint8_t len = 32;
+
+void loop() {
+	if (nrf24ReceiveMessage(buf, &len)) {
+		Serial.println("Message received");
+
+		int c = countCommand(commandos);
+		for (int n = 0; n < c; n += 1) {
+			commandos[n].command = NULL;
+			commandos[n].value = NULL;
+		}
+		c = buf[0];
+		Serial.println("Received " + String(c) + " commands");
+		for (int n = 0; n < c; n += 1) {
+			addCommand(commandos, (char)buf[n * 3 + 1], (((int)buf[n * 3 + 2]) << 8) + (int)buf[n * 3 + 3]);
+		}
+		Serial.println(F("Received commands!"));
+		Serial.println();
+		printCommand(commandos);
+
+
+		// execute commands here
+		delay(500);
+		Serial.println();
+		Serial.println("...");
+		delay(500);
+		Serial.println();
+		Serial.println("<pretend I'm executing commands please>");
+		delay(3000);
+		Serial.println();
+		Serial.println("DONE!");
+		Serial.println();
+		Serial.println();
+	}
+}
 
 ///////////////////////////////
 //////////MAIN LOOP////////////
 ///////////////////////////////
-void loop()
+void loop2()
 {
 	int  c = Serial.read();
 	switch (c)
@@ -212,7 +250,7 @@ void loop()
 	{
 		sensors.requestTemperatures(); // Send the command to get temperatures
 		Serial.print(F("Temperature for the Steppermotor is: "));
-		Serial.println(sensors.getTempC(motor1Temp));	
+		Serial.println(sensors.getTempC(motor1Temp));
 		break;
 	}
 	case '.':
@@ -284,5 +322,4 @@ void loop()
 	else
 		myStepper.disableOutputs();
 }
-
 
