@@ -1,7 +1,7 @@
 /*
- Name:		Robot.ino
- Created:	5/19/2016 4:07:57 PM
- Author:	Use Waterpret
+Name:		Robot.ino
+Created:	5/19/2016 4:07:57 PM
+Author:	Use Waterpret
 */
 
 #define Servo ServoTimer2
@@ -36,12 +36,13 @@ void runCommand(CommandBook *book);
 void printCommand(CommandBook *book);
 OneWire oneWire(A0);								// Setup a oneWire instance to communicate with any OneWire devices 
 DallasTemperature sensors(&oneWire);				// Pass the oneWire reference to Dallas Temperature.							
-AccelStepper kopStepper(AccelStepper::FULL4WIRE, 13, 12, 11, 9, FALSE);	// initialize the stepper library on pins  and disable the output;
-AccelStepper myStepper(AccelStepper::FULL4WIRE, A2, A3, A4, A5, FALSE);// initialize the stepper library on pins  and disable the output;
+AccelStepper myStepper(AccelStepper::FULL4WIRE, A2, A3, A4, A5, FALSE);	// initialize the stepper library on pins 2,4,6,7 and disable the output;
+AccelStepper kopStepper(AccelStepper::FULL4WIRE, 2, 4, 6, 7, FALSE);	// initialize the stepper library on pins 2,4,6,7 and disable the output;
+
 DeviceAddress motor1Temp;							// arrays to hold device addresses of the TempSensors
 CommandBook commandos[BOOKSIZE] = {};				// array with commands for the Arduino
 Servo servoArm;										// Arm servo signal
-Servo servoGrab;									// Grabbbing Servo
+Servo servoGrab;									// Grabbbing Servo979990
 const int delayRest = 100;							// Standard delay for momentum to stablelize
 const int armNeutralPosition = 90;					// Neutral position of the grabber
 const int grabberNeutralPosition = 60;				// Ground position of the grabber
@@ -50,9 +51,10 @@ const int armOffset = 0;							// turn ofset for the head in degrees
 const int stepsPerRevolution = 200;					// change this to fit the number of steps per revolution for your motor
 const int acceleration = 350;						// Acceleration
 const float pi = 3.141592654;						// this one is a piece of cake
-			
+
 int stepCount = 0;									// number of steps the motor has taken
 int motorSpeed = 0;									// Speed of the motor in RPM
+int kopSpeed = 0;									// Speed of the kopmotor in RPM
 int motorDirection = 1;								// direction of the motor
 unsigned long previousMillis = 0;					// will store last time LED was updatedvccv
 float rpm2steps = stepsPerRevolution / 60.0f;
@@ -91,26 +93,25 @@ void setup()										// Built in initialization block
 	sensors.begin();								// Initialise the temperaturesensor bus
 	if (!sensors.getAddress(motor1Temp, 0))			// Check if the temperaturesensors are connected.
 		Serial.println(F("Unable to find address for motor1Temp"));
-	
+
 	Serial.print(F(" -Connecting motor1Temp:\t"));
 	if (!sensors.isConnected(motor1Temp))
 		Serial.println(F("motor1Temp is not connected"));
 	else
 		Serial.println(F("OK"));
 
-	Serial.print(F("-Connecting motor2:"));
-	Serial.print(F(" -Max speed:\t"));
+
+	Serial.println(F("Attaching myStepper:\t"));
 	myStepper.setMaxSpeed(220 * rpm2steps);
 	Serial.print(F(" -Max speed:\t"));
 	Serial.println(myStepper.maxSpeed());
 	myStepper.setAcceleration(350);
 	Serial.print(F(" -Acceleration:\t"));
 	Serial.println(acceleration);
-
-	Serial.print(F("-Connecting motor2:"));
+	Serial.println(F("Attaching kopStepper:\t"));
 	kopStepper.setMaxSpeed(220 * rpm2steps);
 	Serial.print(F(" -Max speed:\t"));
-	Serial.println(myStepper.maxSpeed());
+	Serial.println(kopStepper.maxSpeed());
 	kopStepper.setAcceleration(350);
 	Serial.print(F(" -Acceleration:\t"));
 	Serial.println(acceleration);
@@ -163,6 +164,10 @@ void loop()
 	}
 	case '0':
 	{
+		kopStepper.stop();
+		while (kopStepper.distanceToGo())
+			kopStepper.run();
+		kopSpeed = 0;
 		motorSpeed = 0;
 		Serial.print(F("Motorspeed: "));
 		Serial.println(motorSpeed);
@@ -220,7 +225,7 @@ void loop()
 	{
 		sensors.requestTemperatures(); // Send the command to get temperatures
 		Serial.print(F("Temperature for the Steppermotor is: "));
-		Serial.println(sensors.getTempC(motor1Temp));	
+		Serial.println(sensors.getTempC(motor1Temp));
 		break;
 	}
 	case '.':
@@ -254,24 +259,18 @@ void loop()
 	}
 	case '3':
 	{
-		SPI.end();
 		Serial.println(F("Extending arm "));
-		kopStepper.move(-1050);
-		while (kopStepper.distanceToGo())
-			kopStepper.run();
-		kopStepper.disableOutputs();
-		SPI.begin();
-		uint8_t* data = (uint8_t*) "Test bericht";
-		nrf24SendMessage(data, 13);
-		Serial.println(F("Message sent"));
+		myStepper.move(-1050);
+		while (myStepper.distanceToGo())
+			myStepper.run();
 		break;
 	}
 	case '1':
 	{
 		Serial.println(F("Retracting arm "));
-		kopStepper.move(1050);
-		while (kopStepper.distanceToGo())
-			kopStepper.run();
+		myStepper.move(1050);
+		while (myStepper.distanceToGo())
+			myStepper.run();
 		break;
 	}
 	case 't':
@@ -288,6 +287,24 @@ void loop()
 		runCommand(commandos);
 		break;
 	}
+	case '<':
+	{
+		Serial.println("Spooling up kopStepper");
+		kopStepper.move(-2000);
+		while (kopStepper.distanceToGo() < -1000)
+			kopStepper.run();
+		kopSpeed = -kopStepper.maxSpeed();
+		break;
+	}
+	case '>':
+	{
+		Serial.println("Spooling up kopStepper");
+		kopStepper.move(2000);
+		while (kopStepper.distanceToGo() > 1000)
+			kopStepper.run();
+		kopSpeed = kopStepper.maxSpeed();
+		break;
+	}
 	}
 	}
 	// set the motor speed in RPM:
@@ -297,6 +314,13 @@ void loop()
 	}
 	else
 		myStepper.disableOutputs();
+	
+	if (kopSpeed != 0) {
+		kopStepper.setSpeed(kopSpeed * rpm2steps);
+		kopStepper.runSpeed();			//Run kopmotor at set speed.		
+	}
+	else
+		kopStepper.disableOutputs();
 }
 
 
