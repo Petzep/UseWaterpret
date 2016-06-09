@@ -248,3 +248,8 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+
+# Project files
+*__vm*
+*Debug*
+*Release*

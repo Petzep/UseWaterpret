@@ -54,25 +54,25 @@ CommandBook commandos[BOOKSIZE] = {};				// array with commands for the Arduino
 // Menu variables
 MenuSystem ms;
 Menu mm("Main Menu", &display_menu);
-Menu muMessages(">Messages", &display_menu);
-	MenuItem muMessages_test("-Send test message", &on_testMessage_selected);
-	MenuItem muMessages_otherTest("-Send another test message", &on_otherMessage_selected);
-	BackMenuItem muMessages_back(" -Back-", &on_back_item_selected, &ms);
-Menu muRobot(">Robot", &display_menu);
-	Menu muCommand(">Command Builder", &display_menu);
-		NumericMenuItem muCommand_type("-Command type", 0, 0, 5, 1, format_type);
+Menu muMessages("Messages..", &display_menu);
+	MenuItem muMessages_test("Send test message", &on_testMessage_selected);
+	MenuItem muMessages_otherTest("Send another test message", &on_otherMessage_selected);
+	BackMenuItem muMessages_back("Back..", &on_back_item_selected, &ms);
+Menu muRobot("Robot..", &display_menu);
+	Menu muCommand("Command Builder..", &display_menu);
+		NumericMenuItem muCommand_type("Command type", 0, 0, 5, 1, format_type);
 		NumericMenuItem muCommand_value("value", -1500, 0, 1500, 100, format_value);
-		MenuItem muCommand_add("-Add command to CommandBook", &on_add_selected);
-		MenuItem muCommand_print("-print CommandBook", &on_print_selected);
-		MenuItem muCommand_sent("-sent CommandBook", &on_sent_selected);
-	MenuItem muRobot_status("-Status", &on_status_selected);
-	NumericMenuItem muRobot_kleur("-Kleurselector", 0, 0, 2, 1, format_color);
+		MenuItem muCommand_add("Add command to CommandBook", &on_add_selected);
+		MenuItem muCommand_print("print CommandBook", &on_print_selected);
+		MenuItem muCommand_sent("sent CommandBook", &on_sent_selected);
+	MenuItem muRobot_status("Status", &on_status_selected);
+	NumericMenuItem muRobot_kleur("Kleurselector", 0, 0, 2, 1, format_color);
 	CustomNumericMenuItem muRobot_speed(12, "Max Speed (slider)", 300, 200, 400, 20, format_int);
 	NumericMenuItem muRobot_temp("Max Temp", 100.0, 60.0, 80.0, 0.2, format_float);
 	NumericMenuItem muRobot_accel("Acceleration", 350, 300, 400, 25, format_int);
-	BackMenuItem muRobot_back(" -Back-", &on_back_item_selected, &ms);
-MenuItem mm_help("-help", &on_help_selected);
-MenuItem mm_about("-About", &on_about_selected);
+	BackMenuItem muRobot_back("Back..", &on_back_item_selected, &ms);
+MenuItem mm_help("Help", &on_help_selected);
+MenuItem mm_about("About", &on_about_selected);
 
 void setup()
 {
