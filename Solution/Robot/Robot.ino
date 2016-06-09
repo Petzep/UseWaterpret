@@ -36,7 +36,8 @@ void runCommand(CommandBook *book);
 void printCommand(CommandBook *book);
 OneWire oneWire(A0);								// Setup a oneWire instance to communicate with any OneWire devices 
 DallasTemperature sensors(&oneWire);				// Pass the oneWire reference to Dallas Temperature.							
-AccelStepper myStepper(AccelStepper::FULL4WIRE, 2, 4, 6, 7, FALSE);	// initialize the stepper library on pins 2,4,6,7 and disable the output;
+AccelStepper kopStepper(AccelStepper::FULL4WIRE, 13, 12, 11, 9, FALSE);	// initialize the stepper library on pins  and disable the output;
+AccelStepper myStepper(AccelStepper::FULL4WIRE, A2, A3, A4, A5, FALSE);// initialize the stepper library on pins  and disable the output;
 DeviceAddress motor1Temp;							// arrays to hold device addresses of the TempSensors
 CommandBook commandos[BOOKSIZE] = {};				// array with commands for the Arduino
 Servo servoArm;										// Arm servo signal
@@ -97,13 +98,20 @@ void setup()										// Built in initialization block
 	else
 		Serial.println(F("OK"));
 
-	//setTemperatureAlarm(70);					// Set temperature alarm on 70
-
-
+	Serial.print(F("-Connecting motor2:"));
+	Serial.print(F(" -Max speed:\t"));
 	myStepper.setMaxSpeed(220 * rpm2steps);
 	Serial.print(F(" -Max speed:\t"));
 	Serial.println(myStepper.maxSpeed());
 	myStepper.setAcceleration(350);
+	Serial.print(F(" -Acceleration:\t"));
+	Serial.println(acceleration);
+
+	Serial.print(F("-Connecting motor2:"));
+	kopStepper.setMaxSpeed(220 * rpm2steps);
+	Serial.print(F(" -Max speed:\t"));
+	Serial.println(myStepper.maxSpeed());
+	kopStepper.setAcceleration(350);
 	Serial.print(F(" -Acceleration:\t"));
 	Serial.println(acceleration);
 
@@ -246,18 +254,24 @@ void loop()
 	}
 	case '3':
 	{
+		SPI.end();
 		Serial.println(F("Extending arm "));
-		myStepper.move(-1050);
-		while (myStepper.distanceToGo())
-			myStepper.run();
+		kopStepper.move(-1050);
+		while (kopStepper.distanceToGo())
+			kopStepper.run();
+		kopStepper.disableOutputs();
+		SPI.begin();
+		uint8_t* data = (uint8_t*) "Test bericht";
+		nrf24SendMessage(data, 13);
+		Serial.println(F("Message sent"));
 		break;
 	}
 	case '1':
 	{
 		Serial.println(F("Retracting arm "));
-		myStepper.move(1050);
-		while (myStepper.distanceToGo())
-			myStepper.run();
+		kopStepper.move(1050);
+		while (kopStepper.distanceToGo())
+			kopStepper.run();
 		break;
 	}
 	case 't':
