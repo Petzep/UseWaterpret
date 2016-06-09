@@ -100,8 +100,6 @@ bool nrf24SendMessage(uint8_t* str, uint8_t len) {
 		address = CLIENT_ADDRESS;
 	}
 
-	Serial.println((char*)str);
-	Serial.println(len);
 	if (!manager.sendtoWait(str, len, address)) {
 		debugln(F("No acknowledgement received"));
 		return false;

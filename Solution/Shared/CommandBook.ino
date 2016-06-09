@@ -75,3 +75,16 @@ bool deleteCommand(CommandBook *book)
 	book[c - 1].value = NULL;
 	return true;
 }
+
+bool sendCommand(CommandBook *book) {
+	int c = countCommand(book);
+	uint8_t* buf = new uint8_t[c * 3];
+	for (int n = 0; n < c; n += 1) {
+		buf[n * 3 + 0] = (uint8_t)book[c].command;
+		buf[n * 3 + 1] = (uint8_t)(book[c].value & 0xFF);
+		buf[n * 3 + 2] = (uint8_t)((book[c].value >> 8) & 0xFF);
+	}
+
+	Serial.println(F("Sending message..."));
+	return nrf24SendMessage(buf, c * 3);
+}

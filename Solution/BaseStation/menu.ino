@@ -101,9 +101,10 @@ void on_del_selected(MenuItem* p_menu_item)
 
 void on_send_selected(MenuItem* p_menu_item)
 {
-	Serial.println(F("Commands sent"));
-
-	//...
+	if (!sendCommand(commandos)) {
+		Serial.println(F("ERROR:"));
+		Serial.println(F("Could not send commands"));
+	}
 
 	delay(1000);
 }

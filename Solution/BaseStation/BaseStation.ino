@@ -51,6 +51,7 @@ int countCommand(CommandBook *book);
 void runCommand(CommandBook *book);
 void printCommand(CommandBook *book);
 bool deleteCommand(CommandBook *book);
+bool sendCommand(CommandBook *book);
 CommandBook commandos[BOOKSIZE] = {};				// array with commands for the Arduino
 
 // Menu variables
