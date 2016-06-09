@@ -43,12 +43,14 @@ void on_back_item_selected(MenuItem* p_menu_item);
 void on_help_selected(MenuItem* p_menu_item);
 void on_about_selected(MenuItem* p_menu_item);
 void on_add_selected(MenuItem* p_menu_item);
-void on_print_selected(MenuItem* p_menu_item);
-void on_sent_selected(MenuItem* p_menu_item);
-void addCommand(CommandBook *book, char command, int value);
+void on_del_selected(MenuItem* p_menu_item);
+void on_demo_selected(MenuItem* p_menu_item);
+void on_send_selected(MenuItem* p_menu_item);
+bool addCommand(CommandBook *book, char command, int value);
 int countCommand(CommandBook *book);
 void runCommand(CommandBook *book);
 void printCommand(CommandBook *book);
+bool deleteCommand(CommandBook *book);
 CommandBook commandos[BOOKSIZE] = {};				// array with commands for the Arduino
 
 // Menu variables
@@ -61,12 +63,12 @@ Menu muMessages("Messages..", &display_menu);
 Menu muRobot("Robot..", &display_menu);
 	Menu muCommand("Command Builder..", &display_menu);
 		NumericMenuItem muCommand_type("Command type", 0, 0, 5, 1, format_type);
-		NumericMenuItem muCommand_value("value", -1500, 0, 1500, 100, format_value);
+		NumericMenuItem muCommand_value("Value", 0, -15, 15, 1, format_value);
 		MenuItem muCommand_add("Add command to CommandBook", &on_add_selected);
-		MenuItem muCommand_print("print CommandBook", &on_print_selected);
-		MenuItem muCommand_sent("sent CommandBook", &on_sent_selected);
+		MenuItem muCommand_delete("Delete command from CommandBook", &on_del_selected);
+		MenuItem muCommand_demo("Set demo sequence", &on_demo_selected);
+		MenuItem muCommand_send("Send CommandBook to Robot", &on_send_selected);
 	MenuItem muRobot_status("Status", &on_status_selected);
-	NumericMenuItem muRobot_kleur("Kleurselector", 0, 0, 2, 1, format_color);
 	CustomNumericMenuItem muRobot_speed(12, "Max Speed (slider)", 300, 200, 400, 20, format_int);
 	NumericMenuItem muRobot_temp("Max Temp", 100.0, 60.0, 80.0, 0.2, format_float);
 	NumericMenuItem muRobot_accel("Acceleration", 350, 300, 400, 25, format_int);
@@ -77,7 +79,7 @@ MenuItem mm_about("About", &on_about_selected);
 void setup()
 {
 	Serial.begin(9600);
-	nrf24Initialize();
+	nrf24Initialize(true);
 
 	mm.add_menu(&muMessages);
 		muMessages.add_item(&muMessages_test);
@@ -88,10 +90,10 @@ void setup()
 			muCommand.add_item(&muCommand_type);
 			muCommand.add_item(&muCommand_value);
 			muCommand.add_item(&muCommand_add);
-			muCommand.add_item(&muCommand_print);
-			muCommand.add_item(&muCommand_sent);
+			muCommand.add_item(&muCommand_delete);
+			muCommand.add_item(&muCommand_demo);
+			muCommand.add_item(&muCommand_send);
 		muRobot.add_item(&muRobot_status);
-		muRobot.add_item(&muRobot_kleur);
 		muRobot.add_item(&muRobot_accel);
 		muRobot.add_item(&muRobot_speed);
 		muRobot.add_item(&muRobot_back);

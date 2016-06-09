@@ -72,7 +72,7 @@ void setup()										// Built in initialization block
 	Serial.println(F(" -Starting Ariel"));
 	Serial.println(F(" -Serial port is open @9600."));
 
-	nrf24Initialize();								// Radio initialisation fuction
+	nrf24Initialize(false);								// Radio initialisation fuction
 
 	Serial.print(F(" -Attaching Arm Servo:\t"));
 	servoArm.attach(3);								// Attach Arm signal to the pin

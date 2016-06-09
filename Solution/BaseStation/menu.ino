@@ -22,29 +22,6 @@ const String format_float(const float value)
 	return String(value);
 }
 
-// writes the value of a float into a char buffer as predefined colors.
-const String format_color(const float value)
-{
-	String buffer;
-
-	switch ((int)value)
-	{
-	case 0:
-		buffer += "Red";
-		break;
-	case 1:
-		buffer += "Green";
-		break;
-	case 2:
-		buffer += "Blue";
-		break;
-	default:
-		buffer += "undef";
-	}
-
-	return buffer;
-}
-
 const String format_type(const float value)
 {
 	String buffer;
@@ -53,26 +30,26 @@ const String format_type(const float value)
 	{
 	case 0:
 		buffer += "Go to plant";
-		tempCommand.command = 'x';
+		tempCommand.command = 't';
 		break;
 	case 1:
 		buffer += "Grab plant";
-		tempCommand.command = 'x';
+		tempCommand.command = 'g';
 		break;
 	case 2:
 		buffer += "Clean plant";
-		tempCommand.command = 'x';
+		tempCommand.command = 'c';
 		break;
 	case 3:
 		buffer += "Return home";
-		tempCommand.command = 'x';
+		tempCommand.command = 'r';
 		break;
 	case 4:
-		buffer += "move";
+		buffer += "Move";
 		tempCommand.command = 'm';
 		break;
 	case 5:
-		buffer += "delay";
+		buffer += "Delay";
 		tempCommand.command = 'd';
 		break;
 	default:
@@ -84,27 +61,67 @@ const String format_type(const float value)
 
 const String format_value(const float value)
 {
-	tempCommand.value =(int)value;
-	return String((int)value);
+	tempCommand.value = (int)value;
+
+	switch (tempCommand.command) {
+	case 't':
+	case 'c':
+		return "plant " + String(tempCommand.value);
+	case 'm':
+		return String(tempCommand.value * 100) + " steps";
+	case 'd':
+		return String(tempCommand.value * 100) + " ms";
+	case 'g':
+	case 'r':
+		return "N/A";
+	default:
+		return "undef";
+	}
 }
 
 void on_add_selected(MenuItem* p_menu_item)
 {
-	addCommand(commandos, tempCommand.command, tempCommand.value);
-	Serial.println(F("Command added"));
+	if (!addCommand(commandos, tempCommand.command, tempCommand.value)) {
+		Serial.println();
+		Serial.println(F("ERROR:"));
+		Serial.println(F("Command book full!"));
+		delay(1000);
+	}
+}
+
+void on_del_selected(MenuItem* p_menu_item)
+{
+	if (!deleteCommand(commandos)) {
+		Serial.println();
+		Serial.println(F("ERROR:"));
+		Serial.println(F("No commands to delete!"));
+		delay(1000);
+	}
+}
+
+void on_send_selected(MenuItem* p_menu_item)
+{
+	Serial.println(F("Commands sent"));
+
+	//...
+
 	delay(1000);
 }
 
-void on_print_selected(MenuItem* p_menu_item)
-{
-	printCommand(commandos);
-	delay(1000);
-}
-
-void on_sent_selected(MenuItem* p_menu_item)
-{
-	Serial.println(F("Commands sended"));
-	delay(1000);
+void on_demo_selected(MenuItem* p_menu_item) {
+	int c = countCommand(commandos);
+	for (int n = 0; n < c; n += 1) {
+		deleteCommand(commandos);
+	}
+	addCommand(commandos, 't', 1);
+	addCommand(commandos, 'g', 0);
+	addCommand(commandos, 'r', 0);
+	addCommand(commandos, 'c', 2);
+	addCommand(commandos, 'g', 0);
+	addCommand(commandos, 'r', 0);
+	addCommand(commandos, 't', 3);
+	addCommand(commandos, 'g', 0);
+	addCommand(commandos, 'r', 0);
 }
 
 void on_testMessage_selected(MenuItem* p_menu_item)
@@ -186,6 +203,11 @@ void display_menu(Menu* p_menu)
 
 		Serial.println("");
 	}
+
+	if (p_menu == &muCommand) {
+		Serial.println();
+		printCommand(commandos);
+	}
 }
 
 
@@ -233,7 +255,8 @@ void serial_handler()
 					while (Serial.read() > 0);
 					break;
 				}
-			} else { // escape
+			}
+			else { // escape
 				ms.back();
 				ms.display();
 			}

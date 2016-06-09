@@ -9,6 +9,12 @@ void r_Grab()
 	armNeutral();
 }
 
+void r_MoveToPlant(int n) {
+	//
+}
+
+
+
 void RPMtester(AccelStepper driver)
 {
 	Serial.println("Testing RPM:");

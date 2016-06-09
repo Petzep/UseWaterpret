@@ -6,11 +6,15 @@ int countCommand(CommandBook *book)
 	return c;
 }
 
-void addCommand(CommandBook *book, char command, int value)
+bool addCommand(CommandBook *book, char command, int value)
 {
 	int c = countCommand(book);
+	if (c >= BOOKSIZE) {
+		return false;
+	}
 	book[c].command = command;
 	book[c].value = value;
+	return true;
 }
 
 #ifndef BASESTATION
@@ -59,4 +63,15 @@ void printCommand(CommandBook *book)
 		Serial.println(book[i].value);
 	}
 	Serial.println("-END OF COMMANDS");
+}
+
+bool deleteCommand(CommandBook *book)
+{
+	int c = countCommand(book);
+	if (c == 0) {
+		return false;
+	}
+	book[c - 1].command = NULL;
+	book[c - 1].value = NULL;
+	return true;
 }
