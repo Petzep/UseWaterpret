@@ -1,7 +1,7 @@
 /*
- Name:		Robot.ino
- Created:	5/19/2016 4:07:57 PM
- Author:	Use Waterpret
+Name:		Robot.ino
+Created:	5/19/2016 4:07:57 PM
+Author:	Use Waterpret
 */
 
 #define Servo ServoTimer2
@@ -38,11 +38,13 @@ bool deleteCommand(CommandBook *book);
 bool sendCommand(CommandBook *book);
 OneWire oneWire(A0);								// Setup a oneWire instance to communicate with any OneWire devices 
 DallasTemperature sensors(&oneWire);				// Pass the oneWire reference to Dallas Temperature.							
-AccelStepper myStepper(AccelStepper::FULL4WIRE, 2, 4, 6, 7, FALSE);	// initialize the stepper library on pins 2,4,6,7 and disable the output;
+AccelStepper myStepper(AccelStepper::FULL4WIRE, A2, A3, A4, A5, FALSE);	// initialize the stepper library on pins 2,4,6,7 and disable the output;
+AccelStepper kopStepper(AccelStepper::FULL4WIRE, 2, 4, 6, 7, FALSE);	// initialize the stepper library on pins 2,4,6,7 and disable the output;
+
 DeviceAddress motor1Temp;							// arrays to hold device addresses of the TempSensors
 CommandBook commandos[BOOKSIZE] = {};				// array with commands for the Arduino
 Servo servoArm;										// Arm servo signal
-Servo servoGrab;									// Grabbbing Servo
+Servo servoGrab;									// Grabbbing Servo979990
 const int delayRest = 100;							// Standard delay for momentum to stablelize
 const int armNeutralPosition = 90;					// Neutral position of the grabber
 const int grabberNeutralPosition = 60;				// Ground position of the grabber
@@ -54,6 +56,7 @@ const float pi = 3.141592654;						// this one is a piece of cake
 
 int stepCount = 0;									// number of steps the motor has taken
 int motorSpeed = 0;									// Speed of the motor in RPM
+int kopSpeed = 0;									// Speed of the kopmotor in RPM
 int motorDirection = 1;								// direction of the motor
 unsigned long previousMillis = 0;					// will store last time LED was updatedvccv
 float rpm2steps = stepsPerRevolution / 60.0f;
@@ -99,13 +102,19 @@ void setup()										// Built in initialization block
 	else
 		Serial.println(F("OK"));
 
-	//setTemperatureAlarm(70);					// Set temperature alarm on 70
 
-
+	Serial.println(F("Attaching myStepper:\t"));
 	myStepper.setMaxSpeed(220 * rpm2steps);
 	Serial.print(F(" -Max speed:\t"));
 	Serial.println(myStepper.maxSpeed());
 	myStepper.setAcceleration(350);
+	Serial.print(F(" -Acceleration:\t"));
+	Serial.println(acceleration);
+	Serial.println(F("Attaching kopStepper:\t"));
+	kopStepper.setMaxSpeed(220 * rpm2steps);
+	Serial.print(F(" -Max speed:\t"));
+	Serial.println(kopStepper.maxSpeed());
+	kopStepper.setAcceleration(350);
 	Serial.print(F(" -Acceleration:\t"));
 	Serial.println(acceleration);
 
@@ -193,6 +202,10 @@ void loop2()
 	}
 	case '0':
 	{
+		kopStepper.stop();
+		while (kopStepper.distanceToGo())
+			kopStepper.run();
+		kopSpeed = 0;
 		motorSpeed = 0;
 		Serial.print(F("Motorspeed: "));
 		Serial.println(motorSpeed);
@@ -312,6 +325,24 @@ void loop2()
 		runCommand(commandos);
 		break;
 	}
+	case '<':
+	{
+		Serial.println("Spooling up kopStepper");
+		kopStepper.move(-2000);
+		while (kopStepper.distanceToGo() < -1000)
+			kopStepper.run();
+		kopSpeed = -kopStepper.maxSpeed();
+		break;
+	}
+	case '>':
+	{
+		Serial.println("Spooling up kopStepper");
+		kopStepper.move(2000);
+		while (kopStepper.distanceToGo() > 1000)
+			kopStepper.run();
+		kopSpeed = kopStepper.maxSpeed();
+		break;
+	}
 	}
 	}
 	// set the motor speed in RPM:
@@ -321,5 +352,12 @@ void loop2()
 	}
 	else
 		myStepper.disableOutputs();
+	
+	if (kopSpeed != 0) {
+		kopStepper.setSpeed(kopSpeed * rpm2steps);
+		kopStepper.runSpeed();			//Run kopmotor at set speed.		
+	}
+	else
+		kopStepper.disableOutputs();
 }
 
