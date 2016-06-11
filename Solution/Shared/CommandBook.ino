@@ -25,37 +25,12 @@ void runCommand(CommandBook *book)
 	{
 		switch (book[i].command)
 		{
-		case 't':
-			// "Go to plant"
-			// value: plant number
-			break;
-		case 'g':
-			// "Grab plant"
-			// value: N/A
-			break;
-		case 'c':
-			// "Clean plant"
-			// value: N/A
-			break;
-		case 'r':
-			// "Return home"
-			// value: N/A
-			break;
-		case 'C':
-			// "Move chain"
-			// value: ×100 steps
-			break;
-		case 'E':
-			// "Move elevator"
-			// value: ×100 steps
-			break;
-		case 'A':
-			// "Move arm"
-			// value: ×100 steps
-			break;
-		case 'W':
-			// "Move wrist"
-			// value: ×10 degrees
+		case 'm':
+		{
+			armStepper.move(book[i].value);
+			while (armStepper.distanceToGo())
+				armStepper.run();
+			armStepper.disableOutputs();
 			break;
 		case 'G':
 			// "Move grabber"
