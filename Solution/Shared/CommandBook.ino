@@ -23,10 +23,10 @@ void runCommand(CommandBook *book)
 		{
 		case 'm':
 		{
-			myStepper.move(book[i].value);
-			while (myStepper.distanceToGo())
-				myStepper.run();
-			myStepper.disableOutputs();
+			armStepper.move(book[i].value);
+			while (armStepper.distanceToGo())
+				armStepper.run();
+			armStepper.disableOutputs();
 			break;
 		}
 		case 'd':

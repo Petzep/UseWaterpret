@@ -73,8 +73,8 @@ void leBlink(int ledPin, int n)
 /*not used
 void setTemperatureAlarm(int temp)
 {
-	sensors.setLowAlarmTemp(motor1Temp, -10);
-	sensors.setHighAlarmTemp(motor1Temp, temp);
+	sensors.setLowAlarmTemp(motorShaftTemp, -10);
+	sensors.setHighAlarmTemp(motorShaftTemp, temp);
 }
 
 void checkAlarm()
