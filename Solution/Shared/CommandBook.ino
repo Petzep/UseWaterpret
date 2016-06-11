@@ -25,24 +25,62 @@ void runCommand(CommandBook *book)
 	{
 		switch (book[i].command)
 		{
-		case 'm':
+		case 't':
 		{
-			armStepper.move(book[i].value);
-			while (armStepper.distanceToGo())
-				armStepper.run();
+			r_MovePlant(book[i].value);
+			break;
+		}
+		case 'c':
+		{
+			r_Cut();
+			break;
+		}
+		case 'r':
+		{
+			r_MovePlant(0);
+			break;
+		}
+		case 'W':
+		{
+			shaftStepper.moveTo(900);
+			shaftStepper.runToPosition();
+			shaftStepper.disableOutputs();
+			break;
+		}
+		case 'S':
+		{
+			shaftStepper.moveTo(0);
+			shaftStepper.runToPosition();
+			shaftStepper.disableOutputs();
+			break;
+		}
+		case 'D':
+		{
+			armStepper.moveTo(750);
+			armStepper.runToPosition();
 			armStepper.disableOutputs();
 			break;
-		case 'G':
-			// "Move grabber"
-			// value: ×10 degrees
-			break;
-		default:
-			// "undef"
 		}
+		case 'A':
+		{
+			armStepper.moveTo(0);
+			armStepper.runToPosition();
+			armStepper.disableOutputs();
+			break;
+		}
+		case 'G':
+		{
+			armTurnPos(book[i].value);
+			break;
+		}
+		default:		// "undef"
+			break;
 		book[i].command = NULL;
 		book[i].value = NULL;
+
+		}
+		Serial.println("Done");
 	}
-	Serial.println("Done");
 }
 #endif // BASESTATION
 

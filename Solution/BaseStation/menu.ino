@@ -33,7 +33,7 @@ const String format_type(const float value)
 		tempCommand.command = 't';
 		break;
 	case 1:
-		buffer += "Grab plant";
+		buffer += "Grab/cut plant";
 		tempCommand.command = 'g';
 		break;
 	case 2:
@@ -45,25 +45,28 @@ const String format_type(const float value)
 		tempCommand.command = 'r';
 		break;
 	case 4:
-		buffer += "Move chain";
-		tempCommand.command = 'C';
+		buffer += "Move shaft up";
+		tempCommand.command = 'W';
 		break;
 	case 5:
-		buffer += "Move elevator";
-		tempCommand.command = 'E';
+		buffer += "Move shaft down";
+		tempCommand.command = 'S';
 		break;
 	case 6:
-		buffer += "Move arm";
-		tempCommand.command = 'A';
+		buffer += "Extend arm";
+		tempCommand.command = 'D';
 		break;
 	case 7:
-		buffer += "Move wrist";
-		tempCommand.command = 'W';
+		buffer += "Retract arm";
+		tempCommand.command = 'A';
 		break;
 	case 8:
 		buffer += "Move grabber";
 		tempCommand.command = 'G';
 		break;
+	case 9:
+		buffer += "Delay";
+		tempCommand.command = 'd';
 	default:
 		buffer += "undef";
 	}
@@ -78,17 +81,19 @@ const String format_value(const float value)
 	switch (tempCommand.command) {
 	case 't':
 		return "plant " + String(tempCommand.value);
-	case 'C':
-	case 'E':
-	case 'A':
-		return String(tempCommand.value * 100) + " steps";
+	case 'g':
+	case 'c':
+	case 'r':
 	case 'W':
+	case 'A':
+	case 'D':
+		return "N/A";
+	case 'm':
+		return String(tempCommand.value * 100) + " steps";
 	case 'G':
 		return String(tempCommand.value * 10) + " degrees";
-	case 'c':
-	case 'g':
-	case 'r':
-		return "N/A";
+	case 'd':
+		return String(tempCommand.value * 500) + " ms";
 	default:
 		return "undef";
 	}
@@ -130,14 +135,14 @@ void on_demo_selected(MenuItem* p_menu_item) {
 		deleteCommand(commandos);
 	}
 	addCommand(commandos, 't', 1);
-	addCommand(commandos, 'g', 0);
-	addCommand(commandos, 'r', 0);
-	addCommand(commandos, 'c', 2);
-	addCommand(commandos, 'g', 0);
-	addCommand(commandos, 'r', 0);
-	addCommand(commandos, 't', 3);
-	addCommand(commandos, 'g', 0);
-	addCommand(commandos, 'r', 0);
+	addCommand(commandos, 'd', 3000);
+	addCommand(commandos, 'W', 0);
+	addCommand(commandos, 'S', 0);
+	addCommand(commandos, 'd', 3000);
+	addCommand(commandos, 'D', 2);
+	addCommand(commandos, 'A', 0);
+	addCommand(commandos, 'd', 3000);
+	addCommand(commandos, 'C', 0);
 }
 
 void on_help_selected(MenuItem* p_menu_item)

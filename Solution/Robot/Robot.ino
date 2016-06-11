@@ -6,8 +6,9 @@ Author:	Use Waterpret
 
 #define Servo ServoTimer2
 //#define ENABLE_DEBUG
-//#define REMOTE
+#define REMOTE
 #define BOOKSIZE 10
+
 struct CommandBook
 {
 	char command;
@@ -30,23 +31,15 @@ struct CommandBook
 #include <OneWire\OneWire.h>						// The OneWire-protocol used by te temp sensor
 #include <DallasTemperatureControl\DallasTemperature.h>	// DallasTemperature library for controlling the DS18S20 temperature monitor
 
-void r_RPMtester(AccelStepper driver);				// Small acceleration test.
-void r_DirectionTest();								// Small direction test.
-void addCommand(CommandBook *book, char command, int value);
-int countCommand(CommandBook *book);
-void runCommand(CommandBook *book);
-void printCommand(CommandBook *book);
-bool deleteCommand(CommandBook *book);
-bool sendCommand(CommandBook *book);
 
 OneWire oneWire(A0);								// Setup a oneWire instance to communicate with any OneWire devices 
 DallasTemperature sensors(&oneWire);				// Pass the oneWire reference to Dallas Temperature.							
 AccelStepper shaftStepper(AccelStepper::FULL4WIRE, 13, 12, 11, 9, FALSE);// initialize the stepper library on pins 13,12,11,9 and disable the output;
 AccelStepper kopStepper(AccelStepper::FULL4WIRE, 2, 4, 6, 7, FALSE);	// initialize the stepper library on pins 2,4,6,7 and disable the output;
 AccelStepper armStepper(AccelStepper::FULL4WIRE, A2, A3, A4, A5, FALSE);// initialize the stepper library on pins A2,A3,A4,A5 and disable the output;
+CommandBook commandos[BOOKSIZE] = {};				// array with commands for the Arduino
 
 DeviceAddress motorShaftTemp;						// arrays to hold device addresses of the TempSensors
-CommandBook commandos[BOOKSIZE] = {};				// array with commands for the Arduino
 Servo servoArm;										// Arm servo signal
 Servo servoGrab;									// Grabbbing Servo
 const int delayRest = 100;							// Standard delay for momentum to stablelize
@@ -64,6 +57,17 @@ char motorDirection = 1;							// direction of the motor
 unsigned long previousMillis = 0;					// will store last time LED was updatedvccv
 float rpm2steps = stepsPerRevolution / 60.0f;
 
+uint8_t* buf = new uint8_t[32];
+uint8_t len = 32;
+
+void r_RPMtester(AccelStepper driver);				// Small acceleration test.
+void r_DirectionTest();								// Small direction test.
+bool addCommand(CommandBook *book, char command, int value);
+int countCommand(CommandBook *book);
+void runCommand(CommandBook *book);
+void printCommand(CommandBook *book);
+bool deleteCommand(CommandBook *book);
+bool sendCommand(CommandBook *book);
 /////////////////////////////////
 ///USER DETERMINED VARIABLES/////
 /////////////////////////////////
@@ -138,11 +142,10 @@ void setup()										// Built in initialization block
 	Serial.println(F("Ariel has started"));
 }
 
+///////////////////////////////
+//////////MAIN LOOP////////////
+//////////////////////////////
 #ifdef REMOTE
-
-uint8_t* buf = new uint8_t[32];
-uint8_t len = 32;
-
 void loop() {
 	if (nrf24ReceiveMessage(buf, &len)) {
 		Serial.println("Message received");
@@ -169,11 +172,7 @@ void loop() {
 		Serial.println();
 	}
 }
-#else
-
-///////////////////////////////
-//////////MAIN LOOP////////////
-///////////////////////////////
+#else/
 void loop()
 {
 	int  c = Serial.read();

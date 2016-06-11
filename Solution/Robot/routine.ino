@@ -65,7 +65,7 @@ void r_DirectionTest()
 	kopStepper.disableOutputs();
 }
 
-void movePlant(int plant)
+void r_MovePlant(int plant)
 {
 	kopStepper.moveTo(200*plant);
 	kopStepper.runToPosition();
