@@ -142,18 +142,11 @@ void loop() {
 		Serial.println();
 		printCommand(commandos);
 
+		runCommand(commandos);
 
-		// execute commands here
-		delay(500);
-		Serial.println();
-		Serial.println("...");
-		delay(500);
-		Serial.println();
-		Serial.println("<pretend I'm executing commands please>");
-		delay(3000);
+		delay(1000);
 		Serial.println();
 		Serial.println("DONE!");
-		Serial.println();
 		Serial.println();
 	}
 }

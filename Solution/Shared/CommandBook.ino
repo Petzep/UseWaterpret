@@ -25,24 +25,44 @@ void runCommand(CommandBook *book)
 	{
 		switch (book[i].command)
 		{
-		case 'm':
-		{
-			myStepper.move(book[i].value);
-			while (myStepper.distanceToGo())
-				myStepper.run();
-			myStepper.disableOutputs();
+		case 't':
+			// "Go to plant"
+			// value: plant number
 			break;
-		}
-		case 'd':
-		{
-			delay(book[i].value);
+		case 'g':
+			// "Grab plant"
+			// value: N/A
 			break;
-		}
+		case 'c':
+			// "Clean plant"
+			// value: N/A
+			break;
+		case 'r':
+			// "Return home"
+			// value: N/A
+			break;
+		case 'C':
+			// "Move chain"
+			// value: ×100 steps
+			break;
+		case 'E':
+			// "Move elevator"
+			// value: ×100 steps
+			break;
+		case 'A':
+			// "Move arm"
+			// value: ×100 steps
+			break;
+		case 'W':
+			// "Move wrist"
+			// value: ×10 degrees
+			break;
+		case 'G':
+			// "Move grabber"
+			// value: ×10 degrees
+			break;
 		default:
-		{
-			Serial.println("Invaild command!");
-			break;
-		}
+			// "undef"
 		}
 		book[i].command = NULL;
 		book[i].value = NULL;
