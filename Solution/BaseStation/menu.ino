@@ -71,11 +71,14 @@ const String format_type(const float value)
 	case 10:
 		buffer += "Delay";
 		tempCommand.command = 'd';
+		break;
 	case 11:
 		buffer += "Move";
 		tempCommand.command = 'm';
+		break;
 	default:
 		buffer += "undef";
+		break;
 	}
 
 	return buffer;
@@ -176,7 +179,24 @@ void on_about_selected(MenuItem* p_menu_item)
 
 void on_status_selected(MenuItem* p_menu_item)
 {
-	Serial.println(F("Not implemented..."));
+	Serial.println(F("Returning status of the robot:<placeholder>"));
+	Serial.println(F("------------------------------"));
+	Serial.print(F("Temperature: "));
+	Serial.println(F("80"));
+	Serial.print(F("Max speed (RPM): "));
+	Serial.println(F("300"));
+	Serial.print(F("Acceleration: "));
+	Serial.println(F("80"));
+	Serial.print(F("Motor1 "));
+	Serial.println(F("running"));
+	Serial.print(F("Motor2: "));
+	Serial.println(F("not running"));
+	Serial.print(F("Motor3: "));
+	Serial.println(F("not running"));
+	Serial.print(F("ServoArm (degrees):"));
+	Serial.println(F("167"));
+	Serial.print(F("MotorGrab: "));
+	Serial.println(F("086"));
 	delay(3000);
 }
 
