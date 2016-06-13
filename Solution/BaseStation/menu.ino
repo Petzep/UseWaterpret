@@ -62,11 +62,18 @@ const String format_type(const float value)
 		break;
 	case 8:
 		buffer += "Move grabber";
-		tempCommand.command = 'G';
+		tempCommand.command = 'i';
 		break;
 	case 9:
+		buffer += "Move arm";
+		tempCommand.command = 'u';
+		break;
+	case 10:
 		buffer += "Delay";
 		tempCommand.command = 'd';
+	case 11:
+		buffer += "Move";
+		tempCommand.command = 'm';
 	default:
 		buffer += "undef";
 	}
@@ -86,11 +93,14 @@ const String format_value(const float value)
 	case 'r':
 	case 'W':
 	case 'A':
+	case 'S':
 	case 'D':
 		return "N/A";
 	case 'm':
 		return String(tempCommand.value * 100) + " steps";
-	case 'G':
+	case 'u':
+		return String(tempCommand.value * 10) + " degrees";
+	case 'i':
 		return String(tempCommand.value * 10) + " degrees";
 	case 'd':
 		return String(tempCommand.value * 500) + " ms";
@@ -139,10 +149,10 @@ void on_demo_selected(MenuItem* p_menu_item) {
 	addCommand(commandos, 'W', 0);
 	addCommand(commandos, 'S', 0);
 	addCommand(commandos, 'd', 3000);
-	addCommand(commandos, 'D', 2);
+	addCommand(commandos, 'D', 0);
 	addCommand(commandos, 'A', 0);
 	addCommand(commandos, 'd', 3000);
-	addCommand(commandos, 'C', 0);
+	addCommand(commandos, 'c', 0);
 }
 
 void on_help_selected(MenuItem* p_menu_item)

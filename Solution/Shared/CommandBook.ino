@@ -35,6 +35,11 @@ void runCommand(CommandBook *book)
 			r_Cut();
 			break;
 		}
+		case 'g':
+		{
+			r_Grab();
+			break;
+		}
 		case 'r':
 		{
 			r_MovePlant(0);
@@ -42,6 +47,7 @@ void runCommand(CommandBook *book)
 		}
 		case 'W':
 		{
+			shaftStepper.enableOutputs();
 			shaftStepper.moveTo(900);
 			shaftStepper.runToPosition();
 			shaftStepper.disableOutputs();
@@ -49,13 +55,15 @@ void runCommand(CommandBook *book)
 		}
 		case 'S':
 		{
+			shaftStepper.enableOutputs();
 			shaftStepper.moveTo(0);
 			shaftStepper.runToPosition();
-			shaftStepper.disableOutputs();
+			//shaftStepper.disableOutputs(); //Keeping the shaft on it's place ONE TIME ONLY FOR DEMO (MABYE 2-3, but check temperature)
 			break;
 		}
 		case 'D':
 		{
+			armStepper.enableOutputs();
 			armStepper.moveTo(750);
 			armStepper.runToPosition();
 			armStepper.disableOutputs();
@@ -63,14 +71,30 @@ void runCommand(CommandBook *book)
 		}
 		case 'A':
 		{
+			armStepper.enableOutputs();
 			armStepper.moveTo(0);
 			armStepper.runToPosition();
 			armStepper.disableOutputs();
 			break;
 		}
-		case 'G':
+		case 'u':
 		{
-			armTurnPos(book[i].value);
+			armTurnPos(book[i].value * 10);
+			break;
+		}
+		case 'i':
+		{
+			grabberTurnPos(book[i].value *10 );
+			break;
+		}
+		case 'd':
+		{
+			delay(book[i].value*500);
+			break;
+		}
+		case 'm':
+		{
+			kopStepper.move(book[i].value * 100);
 			break;
 		}
 		default:		// "undef"
@@ -79,15 +103,20 @@ void runCommand(CommandBook *book)
 		book[i].value = NULL;
 
 		}
-		Serial.println("Done");
+		Serial.print('-');
+		Serial.print(book[i].command);
+		Serial.print('\t');
+		Serial.print(book[i].value);
+		Serial.println("\tDone");
 	}
+	Serial.println("All commands done.");
 }
 #endif // BASESTATION
 
 void printCommand(CommandBook *book)
 {
 	int c = countCommand(book);
-	Serial.println("Commandos in book:");
+	Serial.println(F("Commandos in book:"));
 	for (int i = 0; i < c; i++)
 	{
 		Serial.print('-');
@@ -95,7 +124,7 @@ void printCommand(CommandBook *book)
 		Serial.print('\t');
 		Serial.println(book[i].value);
 	}
-	Serial.println("-END OF COMMANDS");
+	Serial.println(F("-END OF COMMANDS"));
 }
 
 bool deleteCommand(CommandBook *book)

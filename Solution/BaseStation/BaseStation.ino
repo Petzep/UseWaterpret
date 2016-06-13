@@ -56,7 +56,7 @@ CommandBook commandos[BOOKSIZE] = {};				// array with commands for the Arduino
 MenuSystem ms;
 Menu mm("Main Menu", &display_menu);
 	Menu muCommand("Command Builder..", &display_menu);
-		NumericMenuItem muCommand_type("Command type", 0, 0, 9, 1, format_type);
+		NumericMenuItem muCommand_type("Command type", 0, 0, 11, 1, format_type);
 		NumericMenuItem muCommand_value("Value", 0, -15, 15, 1, format_value);
 		MenuItem muCommand_add("Add command to CommandBook", &on_add_selected);
 		MenuItem muCommand_delete("Delete command from CommandBook", &on_del_selected);
@@ -71,6 +71,7 @@ void setup()
 {
 	Serial.begin(9600);
 	nrf24Initialize(true);
+	delay(3000);
 
 	mm.add_menu(&muCommand);
 		muCommand.add_item(&muCommand_type);

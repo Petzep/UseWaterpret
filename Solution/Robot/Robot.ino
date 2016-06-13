@@ -6,8 +6,8 @@ Author:	Use Waterpret
 
 #define Servo ServoTimer2
 //#define ENABLE_DEBUG
-#define REMOTE
-#define BOOKSIZE 10
+//#define REMOTE
+#define BOOKSIZE 20
 
 struct CommandBook
 {
@@ -34,7 +34,7 @@ struct CommandBook
 
 OneWire oneWire(A0);								// Setup a oneWire instance to communicate with any OneWire devices 
 DallasTemperature sensors(&oneWire);				// Pass the oneWire reference to Dallas Temperature.							
-AccelStepper shaftStepper(AccelStepper::FULL4WIRE, 13, 12, 11, 9, FALSE);// initialize the stepper library on pins 13,12,11,9 and disable the output;
+AccelStepper shaftStepper(AccelStepper::FULL4WIRE, 13, 12, 11, 9, TRUE);// initialize the stepper library on pins 13,12,11,9 and disable the output;
 AccelStepper kopStepper(AccelStepper::FULL4WIRE, 2, 4, 6, 7, FALSE);	// initialize the stepper library on pins 2,4,6,7 and disable the output;
 AccelStepper armStepper(AccelStepper::FULL4WIRE, A2, A3, A4, A5, FALSE);// initialize the stepper library on pins A2,A3,A4,A5 and disable the output;
 CommandBook commandos[BOOKSIZE] = {};				// array with commands for the Arduino
@@ -51,7 +51,6 @@ const int stepsPerRevolution = 200;					// change this to fit the number of step
 const int acceleration = 350;						// Acceleration
 const float pi = 3.141592654;						// this one is a piece of cake
 
-int stepCount = 0;									// number of steps the motor has taken
 int kopSpeed = 0;									// Speed of the kopmotor in RPM
 char motorDirection = 1;							// direction of the motor
 unsigned long previousMillis = 0;					// will store last time LED was updatedvccv
@@ -98,8 +97,11 @@ void setup()										// Built in initialization block
 		Serial.println(F("OK"));
 
 	sensors.begin();								// Initialise the temperaturesensor bus
+	Serial.print(F("Gettnig motorShaftTemp address\t"));
 	if (!sensors.getAddress(motorShaftTemp, 0))			// Check if the temperaturesensors are connected.
 		Serial.println(F("Unable to find address for motorShaftTemp"));
+	else
+		Serial.println(F("OK"));
 
 	Serial.print(F(" -Connecting motorShaftTemp:\t"));
 	if (!sensors.isConnected(motorShaftTemp))
@@ -147,32 +149,60 @@ void setup()										// Built in initialization block
 //////////////////////////////
 #ifdef REMOTE
 void loop() {
-	if (nrf24ReceiveMessage(buf, &len)) {
-		Serial.println("Message received");
+	SPI.begin();
+	sensors.requestTemperatures(); // Send the command to get temperatures
+	Serial.print(F("Temperature for the Steppermotor is: "));
+	Serial.println(sensors.getTempC(motorShaftTemp));
+	if (nrf24ReceiveMessage(buf, &len))
+	{
+		Serial.println(F("Message received"));
 
 		int c = countCommand(commandos);
-		for (int n = 0; n < c; n += 1) {
+		for (int n = 0; n < c; n += 1)
+		{
 			commandos[n].command = NULL;
 			commandos[n].value = NULL;
 		}
 		c = buf[0];
 		Serial.println("Received " + String(c) + " commands");
-		for (int n = 0; n < c; n += 1) {
+		for (int n = 0; n < c; n += 1)
+		{
 			addCommand(commandos, (char)buf[n * 3 + 1], (((int)buf[n * 3 + 2]) << 8) + (int)buf[n * 3 + 3]);
 		}
+
+		//digitalWrite(11, LOW);
+		//digitalWrite(8, HIGH);
+		//radioSleep();
+		//SPI.transfer(0xAA);
+		//SPI.setDataMode(SPI_MODE0);
+		//delay(2000);
+		SPI.endTransaction();
+		SPI.end();
+		shaftStepper.disableOutputs();
+		Serial.println(digitalRead(9));
+		Serial.println(digitalRead(11));
+		Serial.println(digitalRead(12));
+		Serial.println(digitalRead(12));
+		shaftStepper.enableOutputs();
+
+
 		Serial.println(F("Received commands!"));
 		Serial.println();
 		printCommand(commandos);
+		Serial.println(F("Waiting 3 seconds before executing"));
+		delay(3000);
 
 		runCommand(commandos);
 
 		delay(1000);
 		Serial.println();
+		sensors.requestTemperatures(); // Send the command to get temperatures
+		Serial.print(F("Temperature for the Steppermotor is: "));
+		Serial.println(sensors.getTempC(motorShaftTemp));
 		Serial.println("DONE!");
-		Serial.println();
 	}
 }
-#else/
+#else
 void loop()
 {
 	int  c = Serial.read();
@@ -361,11 +391,25 @@ void loop()
 	case 't':
 	{
 		Serial.println("Testing command ");
-		addCommand(commandos, 'm', 200);
-		addCommand(commandos, 'd', 1000);
-		addCommand(commandos, 'm', -400);
-		addCommand(commandos, 'd', 500);
-		addCommand(commandos, 'm', 100);
+		addCommand(commandos, 't', 1);
+		addCommand(commandos, 'W', 0);
+		addCommand(commandos, 'D', 0);
+		addCommand(commandos, 'c', 0);
+		addCommand(commandos, 'A', 0);
+		addCommand(commandos, 'S', 0);
+		addCommand(commandos, 't', 2);
+		addCommand(commandos, 'W', 0);
+		addCommand(commandos, 'D', 0);
+		addCommand(commandos, 'i', 0);
+		addCommand(commandos, 'A', 0);
+		addCommand(commandos, 'S', 0);
+		addCommand(commandos, 't', 3);
+		addCommand(commandos, 'W', 0);
+		addCommand(commandos, 'D', 0);
+		addCommand(commandos, 'i', 180);
+		addCommand(commandos, 'A', 0);
+		addCommand(commandos, 'S', 0);
+		addCommand(commandos, 't', 0);
 		delay(1000);
 		printCommand(commandos);
 		delay(1000);

@@ -3,10 +3,10 @@ void r_Cut()
 	grabberGrab();
 	for (int i = 0; i < 20; i++)
 	{
-		armTurnPos(armPos + 2);
-		delay(25);
-		armTurnPos(armPos - 2);
-		delay(25);
+		armTurnPos(armPos + 45);
+		delay(200);
+		armTurnPos(armPos - 45);
+		delay(200);
 	}
 	delay(500);
 	grabberNeutral();
@@ -67,6 +67,6 @@ void r_DirectionTest()
 
 void r_MovePlant(int plant)
 {
-	kopStepper.moveTo(200*plant);
+	kopStepper.moveTo((int)200*plant);
 	kopStepper.runToPosition();
 }

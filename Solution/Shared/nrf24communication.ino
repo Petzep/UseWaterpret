@@ -70,7 +70,7 @@ void nrf24DebugPrint(char* str) {
 
 bool nrf24ReceiveMessage(uint8_t* str, uint8_t* len) {
 	uint8_t from;
-	if (!manager.waitAvailableTimeout(1000)) {
+	if (!manager.waitAvailableTimeout(3000)) {
 		return false;
 	}
 
@@ -108,4 +108,15 @@ bool nrf24SendMessage(uint8_t* str, uint8_t len) {
 	}
 	debugln(F("Could not receive 'OK'"));
 	return false;
+}
+
+bool radioSleep()
+{
+	driver.setModeIdle();	
+	if (driver.sleep())
+	{
+		return true;
+	}
+	else
+		return false;
 }
