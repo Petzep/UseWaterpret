@@ -79,22 +79,22 @@ void runCommand(CommandBook *book)
 		}
 		case 'u':
 		{
-			armTurnPos(book[i].value * 10);
+			armTurnPos(book[i].value);
 			break;
 		}
 		case 'i':
 		{
-			grabberTurnPos(book[i].value *10 );
+			grabberTurnPos(book[i].value );
 			break;
 		}
 		case 'd':
 		{
-			delay(book[i].value*500);
+			delay(book[i].value);
 			break;
 		}
 		case 'm':
 		{
-			kopStepper.move(book[i].value * 100);
+			kopStepper.move(book[i].value);
 			break;
 		}
 		default:		// "undef"

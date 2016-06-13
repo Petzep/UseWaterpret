@@ -416,6 +416,26 @@ void loop()
 		runCommand(commandos);
 		break;
 	}
+	case 'g':
+	{
+		Serial.println("Arduin Routine");
+		addCommand(commandos, 'i', 180);
+		addCommand(commandos, 'd', 1000);
+		addCommand(commandos, 'i', 0);
+		addCommand(commandos, 'u', 180);
+		addCommand(commandos, 'd', 1000);
+		addCommand(commandos, 'u', 90);
+		addCommand(commandos, 'd', 1000);
+		addCommand(commandos, 'u', 0);
+		addCommand(commandos, 'd', 500);
+		addCommand(commandos, 'i', 180);
+		addCommand(commandos, 'd', 1000);
+		addCommand(commandos, 'i', 0);
+		printCommand(commandos);
+		delay(1000);
+		runCommand(commandos);
+		break;
+	}
 	case '<':
 	{
 		Serial.println(F("Spooling up kopStepper"));

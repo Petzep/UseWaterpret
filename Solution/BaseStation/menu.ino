@@ -179,7 +179,7 @@ void on_about_selected(MenuItem* p_menu_item)
 
 void on_status_selected(MenuItem* p_menu_item)
 {
-	Serial.println(F("Returning status of the robot:<placeholder>"));
+	Serial.println(F("Returning status of the robot:"));
 	Serial.println(F("------------------------------"));
 	Serial.print(F("Temperature: "));
 	Serial.println(F("80"));
